@@ -1,5 +1,22 @@
-﻿################################################################################
-# Este archivo .gitignore ha sido creado automáticamente por Microsoft(R) Visual Studio.
-################################################################################
+# .NET build output
+bin/
+obj/
 
-/.vs
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Entorno
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Publicacion
+publish/
+out/
