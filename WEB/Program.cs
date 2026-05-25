@@ -1,17 +1,31 @@
+using WEB.Filters;
 using WEB.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllersWithViews();
-builder.Services.AddHttpClient();
+// MVC con filtro global de login
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add<RequireLoginAttribute>();
+});
+
+// HttpClient para llamar a la API
+builder.Services.AddHttpClient("SIGESA_API", client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"]
+        ?? "https://localhost:7001");
+});
+
 builder.Services.AddScoped<IUtilitario, Utilitario>();
 
+// Sesion
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.IdleTimeout = TimeSpan.FromHours(8);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
+    options.Cookie.Name = ".SIGESA.Session";
 });
 
 var app = builder.Build();
@@ -30,6 +44,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Auth}/{action=Login}/{id?}");
 
 app.Run();

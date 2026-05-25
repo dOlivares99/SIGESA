@@ -1,4 +1,7 @@
-namespace Data;
+﻿using System;
+using System.Collections.Generic;
+
+namespace Models.Entities;
 
 public partial class Usuario
 {
@@ -16,13 +19,13 @@ public partial class Usuario
 
     public DateTime FechaCreacion { get; set; }
 
-    public virtual ICollection<Auditoria> Auditoria { get; set; } = [];
+    public virtual ICollection<Auditoria> Auditoria { get; set; } = new List<Auditoria>();
 
-    public virtual ICollection<Cotizacion> Cotizacions { get; set; } = [];
+    public virtual ICollection<Cotizacion> Cotizacions { get; set; } = new List<Cotizacion>();
 
-    public virtual ICollection<Evento> Eventos { get; set; } = [];
+    public virtual ICollection<Evento> Eventos { get; set; } = new List<Evento>();
 
-    public virtual ICollection<Pago> Pagos { get; set; } = [];
+    public virtual ICollection<Pago> Pagos { get; set; } = new List<Pago>();
 
     public virtual Rol Rol { get; set; } = null!;
 }

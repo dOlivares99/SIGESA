@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Data;
+namespace Models.Entities;
 
 public partial class Pago
 {
