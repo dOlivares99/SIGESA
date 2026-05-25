@@ -17,6 +17,7 @@ builder.Services.AddHttpClient("SIGESA_API", client =>
 });
 
 builder.Services.AddScoped<IUtilitario, Utilitario>();
+builder.Services.AddScoped<IRestProvider, RestProvider>();
 
 // Sesion
 builder.Services.AddDistributedMemoryCache();

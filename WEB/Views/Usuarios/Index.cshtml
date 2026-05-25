@@ -1,0 +1,97 @@
+@model List<WEB.Models.ViewModels.UsuarioViewModel>
+@{
+    ViewData["Title"] = "Usuarios";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h5 class="fw-bold mb-0">Usuarios del sistema</h5>
+        <small class="text-muted">Administra los usuarios y sus roles</small>
+    </div>
+    <a asp-action="Crear" class="btn btn-primary btn-sm px-3">
+        <i class="ti ti-plus me-1"></i> Nuevo usuario
+    </a>
+</div>
+
+@if (TempData["Exito"] != null)
+{
+    <div class="alert alert-success">
+        <i class="ti ti-circle-check me-1"></i> @TempData["Exito"]
+    </div>
+}
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger">
+        <i class="ti ti-alert-circle me-1"></i> @ViewBag.Error
+    </div>
+}
+
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table table-hover align-middle mb-0">
+            <thead style="background:#f8f7ff;">
+                <tr>
+                    <th class="ps-4 py-3" style="color:#534AB7;">#</th>
+                    <th class="py-3" style="color:#534AB7;">Nombre</th>
+                    <th class="py-3" style="color:#534AB7;">Correo</th>
+                    <th class="py-3" style="color:#534AB7;">Rol</th>
+                    <th class="py-3" style="color:#534AB7;">Estado</th>
+                    <th class="py-3" style="color:#534AB7;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-5">
+                            <i class="ti ti-users-off" style="font-size:2rem;"></i>
+                            <p class="mt-2 mb-0">No hay usuarios registrados</p>
+                        </td>
+                    </tr>
+                }
+                @foreach (var u in Model)
+                {
+                    <tr>
+                        <td class="ps-4">@u.UsuarioId</td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center"
+                                     style="width:32px;height:32px;background:#f0eeff;color:#534AB7;font-weight:600;font-size:0.8rem;">
+                                    @u.Nombre.Substring(0,1).ToUpper()
+                                </div>
+                                @u.Nombre
+                            </div>
+                        </td>
+                        <td class="text-muted small">@u.Email</td>
+                        <td>
+                            <span class="badge rounded-pill"
+                                  style="background:@(u.RolNombre == "Administrador" ? "#f0eeff" : "#e6f4f0");
+                                         color:@(u.RolNombre == "Administrador" ? "#534AB7" : "#0F6E56");">
+                                @u.RolNombre
+                            </span>
+                        </td>
+                        <td>
+                            @if (u.Activo)
+                            {
+                                <span class="badge rounded-pill" style="background:#e6f4f0;color:#0F6E56;">
+                                    <i class="ti ti-circle-check me-1"></i>Activo
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge rounded-pill bg-secondary">Inactivo</span>
+                            }
+                        </td>
+                        <td>
+                            <a asp-action="Editar" asp-route-id="@u.UsuarioId"
+                               class="btn btn-sm btn-outline-secondary">
+                                <i class="ti ti-edit"></i>
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

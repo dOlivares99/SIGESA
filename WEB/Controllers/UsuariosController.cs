@@ -5,33 +5,41 @@ using WEB.Services;
 
 namespace WEB.Controllers;
 
-public class UsuariosController(IRestProvider restProvider, IConfiguration configuration) : Controller
+public class UsuariosController : Controller
 {
-    private readonly string _apiBase = configuration["ApiSettings:BaseUrl"]
-        ?? "https://localhost:7001/api";
+    private readonly IRestProvider _restProvider;
+    private readonly string _apiBase;
 
-    // GET /Usuarios
+    public UsuariosController(IRestProvider restProvider, IConfiguration configuration)
+    {
+        _restProvider = restProvider;
+        _apiBase = configuration["ApiSettings:BaseUrl"] ?? "http://localhost:5119/api";
+    }
+
     public async Task<IActionResult> Index()
     {
         try
         {
-            var response  = await restProvider.GetAsync($"{_apiBase}/usuariosapi");
-            var usuarios  = JsonSerializer.Deserialize<List<UsuarioViewModel>>(response,
+            var response = await _restProvider.GetAsync(_apiBase + "/usuariosapi");
+            var usuarios = JsonSerializer.Deserialize<List<UsuarioViewModel>>(response,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
                 ?? new List<UsuarioViewModel>();
+
+            // Mapear RolNombre desde el objeto Rol anidado
+            foreach (var u in usuarios)
+                u.RolNombre = u.Rol?.Nombre ?? string.Empty;
+
             return View(usuarios);
         }
         catch (Exception ex)
         {
-            ViewBag.Error = $"Error al cargar usuarios: {ex.Message}";
+            ViewBag.Error = "Error al cargar usuarios: " + ex.Message;
             return View(new List<UsuarioViewModel>());
         }
     }
 
-    // GET /Usuarios/Crear
     public IActionResult Crear() => View(new CrearUsuarioViewModel());
 
-    // POST /Usuarios/Crear
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Crear(CrearUsuarioViewModel model)
@@ -46,36 +54,35 @@ public class UsuariosController(IRestProvider restProvider, IConfiguration confi
                 model.Password,
                 model.RolId
             });
-            await restProvider.PostAsync($"{_apiBase}/usuariosapi", json);
+            await _restProvider.PostAsync(_apiBase + "/usuariosapi", json);
             TempData["Exito"] = "Usuario creado correctamente.";
             return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)
         {
-            ModelState.AddModelError("", $"Error al crear usuario: {ex.Message}");
+            ModelState.AddModelError("", "Error al crear usuario: " + ex.Message);
             return View(model);
         }
     }
 
-    // GET /Usuarios/Editar/5
     public async Task<IActionResult> Editar(int id)
     {
         try
         {
-            var response = await restProvider.GetAsync($"{_apiBase}/usuariosapi/{id}");
-            var usuario  = JsonSerializer.Deserialize<UsuarioViewModel>(response,
+            var response = await _restProvider.GetAsync(_apiBase + "/usuariosapi/" + id);
+            var usuario = JsonSerializer.Deserialize<UsuarioViewModel>(response,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             if (usuario == null) return NotFound();
+            usuario.RolNombre = usuario.Rol?.Nombre ?? string.Empty;
             return View(usuario);
         }
         catch (Exception ex)
         {
-            ViewBag.Error = $"Error al cargar usuario: {ex.Message}";
+            ViewBag.Error = "Error al cargar usuario: " + ex.Message;
             return NotFound();
         }
     }
 
-    // POST /Usuarios/Editar/5
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Editar(int id, UsuarioViewModel model)
@@ -89,13 +96,13 @@ public class UsuariosController(IRestProvider restProvider, IConfiguration confi
                 model.Email,
                 model.RolId
             });
-            await restProvider.PutAsync($"{_apiBase}/usuariosapi/{id}", json);
+            await _restProvider.PutAsync(_apiBase + "/usuariosapi/" + id, json);
             TempData["Exito"] = "Usuario actualizado correctamente.";
             return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)
         {
-            ModelState.AddModelError("", $"Error al actualizar usuario: {ex.Message}");
+            ModelState.AddModelError("", "Error al actualizar usuario: " + ex.Message);
             return View(model);
         }
     }
