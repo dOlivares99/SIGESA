@@ -1,0 +1,77 @@
+﻿@model List<WEB.Models.ViewModels.ClienteViewModel>
+@{
+    ViewData["Title"] = "Clientes";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h5 class="fw-bold mb-0">Clientes</h5>
+        <small class="text-muted">Listado de clientes registrados</small>
+    </div>
+    <a asp-action="Crear" class="btn btn-primary btn-sm px-3">
+        <i class="ti ti-plus me-1"></i> Nuevo cliente
+    </a>
+</div>
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger"><i class="ti ti-alert-circle me-1"></i>@ViewBag.Error</div>
+}
+
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table table-hover align-middle mb-0">
+            <thead style="background:#f8f7ff;">
+                <tr>
+                    <th class="ps-4 py-3" style="color:#534AB7;">#</th>
+                    <th class="py-3" style="color:#534AB7;">Nombre</th>
+                    <th class="py-3" style="color:#534AB7;">Documento</th>
+                    <th class="py-3" style="color:#534AB7;">Teléfono</th>
+                    <th class="py-3" style="color:#534AB7;">Correo</th>
+                    <th class="py-3" style="color:#534AB7;">Registro</th>
+                    <th class="py-3" style="color:#534AB7;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-5">
+                            <i class="ti ti-users-off" style="font-size:2rem;"></i>
+                            <p class="mt-2 mb-0">No hay clientes registrados</p>
+                        </td>
+                    </tr>
+                }
+                @foreach (var c in Model)
+                {
+                    <tr>
+                        <td class="ps-4">@c.ClienteId</td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center"
+                                     style="width:32px;height:32px;background:#f0eeff;color:#534AB7;font-weight:600;font-size:0.8rem;">
+                                    @c.Nombre.Substring(0, 1).ToUpper()
+                                </div>
+                                @c.Nombre
+                            </div>
+                        </td>
+                        <td class="text-muted small">@c.Documento</td>
+                        <td class="text-muted small">@c.Telefono</td>
+                        <td class="text-muted small">@(c.Email ?? "—")</td>
+                        <td class="text-muted small">@c.FechaRegistro.ToString("dd/MM/yyyy")</td>
+                        <td>
+                            <a asp-action="Historial" asp-route-id="@c.ClienteId"
+                               class="btn btn-sm btn-outline-secondary" title="Ver historial">
+                                <i class="ti ti-history"></i>
+                            </a>
+                            <a asp-action="Editar" asp-route-id="@c.ClienteId"
+                               class="btn btn-sm btn-outline-secondary" title="Editar">
+                                <i class="ti ti-edit"></i>
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

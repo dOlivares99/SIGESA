@@ -12,6 +12,8 @@ builder.Services.AddDbContext<SIGESAContext>(options =>
 
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
+builder.Services.AddScoped<IClienteService, ClienteService>();
 builder.Services.AddScoped<IUtilitario, Utilitario>();
 
 builder.Services.AddControllers()

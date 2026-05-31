@@ -1,0 +1,104 @@
+﻿@model WEB.Models.ViewModels.ClienteHistorialViewModel
+@{
+    ViewData["Title"] = "Historial de " + Model.Nombre;
+}
+
+<div class="d-flex align-items-center gap-3 mb-4">
+    <a asp-action="Index" class="btn btn-sm btn-outline-secondary">
+        <i class="ti ti-arrow-left"></i>
+    </a>
+    <div>
+        <h5 class="fw-bold mb-0">Historial de @Model.Nombre</h5>
+        <small class="text-muted">Todos los eventos asociados a este cliente</small>
+    </div>
+</div>
+
+<!-- Ficha del cliente -->
+<div class="card mb-4" style="max-width:560px;">
+    <div class="card-body">
+        <div class="row g-2">
+            <div class="col-6">
+                <small class="text-muted d-block">Documento</small>
+                <span class="fw-medium">@Model.Documento</span>
+            </div>
+            <div class="col-6">
+                <small class="text-muted d-block">Teléfono</small>
+                <span class="fw-medium">@Model.Telefono</span>
+            </div>
+            <div class="col-12">
+                <small class="text-muted d-block">Correo</small>
+                <span class="fw-medium">@(Model.Email ?? "—")</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabla de eventos -->
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table table-hover align-middle mb-0">
+            <thead style="background:#f8f7ff;">
+                <tr>
+                    <th class="ps-4 py-3" style="color:#534AB7;">#</th>
+                    <th class="py-3" style="color:#534AB7;">Tipo de evento</th>
+                    <th class="py-3" style="color:#534AB7;">Paquete</th>
+                    <th class="py-3" style="color:#534AB7;">Fecha</th>
+                    <th class="py-3" style="color:#534AB7;">Estado</th>
+                    <th class="py-3" style="color:#534AB7;">Monto</th>
+                    <th class="py-3" style="color:#534AB7;">Saldo</th>
+                    <th class="py-3" style="color:#534AB7;">Pago</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Eventos.Any())
+                {
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-5">
+                            <i class="ti ti-calendar-off" style="font-size:2rem;"></i>
+                            <p class="mt-2 mb-0">Este cliente no tiene eventos registrados</p>
+                        </td>
+                    </tr>
+                }
+                @foreach (var e in Model.Eventos.OrderByDescending(x => x.FechaEvento))
+                {
+                    <tr>
+                        <td class="ps-4">@e.EventoId</td>
+                        <td>@e.TipoEvento</td>
+                        <td class="text-muted small">@e.PaqueteNombre</td>
+                        <td class="text-muted small">@e.FechaEvento.ToString("dd/MM/yyyy")</td>
+                        <td>
+                            @{
+                                var (bg, fg) = e.Estado switch
+                                {
+                                    "Confirmada" => ("#e6f4f0", "#0F6E56"),
+                                    "Realizada" => ("#e8f0fe", "#1a56db"),
+                                    "Cancelada" => ("#fdf0ed", "#993C1D"),
+                                    "EnProceso" => ("#fdf5e6", "#854F0B"),
+                                    _ => ("#f0eeff", "#534AB7")
+                                };
+                            }
+                            <span class="badge rounded-pill"
+                                  style="background:@bg;color:@fg;">@e.Estado</span>
+                        </td>
+                        <td class="fw-medium">₡@e.MontoTotal.ToString("N2")</td>
+                        <td class="@(e.SaldoPendiente > 0 ? "text-danger" : "text-success") fw-medium">
+                            ₡@e.SaldoPendiente.ToString("N2")
+                        </td>
+                        <td>
+                            @{
+                                var (pbg, pfg) = e.EstadoPago switch
+                                {
+                                    "Saldado" => ("#e6f4f0", "#0F6E56"),
+                                    "Parcial" => ("#fdf5e6", "#854F0B"),
+                                    _ => ("#f0eeff", "#534AB7")
+                                };
+                            }
+                            <span class="badge rounded-pill"
+                                  style="background:@pbg;color:@pfg;">@e.EstadoPago</span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
