@@ -111,3 +111,49 @@ SELECT PaqueteId, Nombre, PrecioBase FROM Paquete;
 PRINT '--- Servicios ---';
 SELECT ServicioId, Nombre, Categoria FROM Servicio ORDER BY Categoria;
 GO
+
+
+
+-- Insertar usuario Admin
+IF NOT EXISTS (SELECT 1 FROM Usuario WHERE Email = 'admin@sigesa.com')
+BEGIN
+    INSERT INTO Usuario (RolId, Nombre, Email, PasswordHash, Activo)
+    VALUES (
+        (SELECT RolId FROM Rol WHERE Nombre = 'Administrador'),
+        'Administrador',
+        'admin@sigesa.com',
+        CONVERT(NVARCHAR(256), HASHBYTES('SHA2_256', 'Admin1234'), 2),
+        1
+    );
+    PRINT 'Usuario Admin insertado correctamente.';
+END
+GO
+
+
+-------------
+
+USE SIGESA;
+GO
+
+-- Eliminar si ya existe el usuario mal hasheado
+DELETE FROM Usuario WHERE Email = 'admin@sigesa.com';
+
+USE SIGESA;
+GO
+
+-- Insertar con hash compatible con el código C# del proyecto
+INSERT INTO Usuario (RolId, Nombre, Email, PasswordHash, Activo)
+VALUES (
+    (SELECT RolId FROM Rol WHERE Nombre = 'Administrador'),
+    'Administrador',
+    'admin@sigesa.com',
+    'AAAAAAAAAAAAAAAAAAAAAA==:YogAAgDnf04c6DJhvtgxzApkpo+nEZr+DSnSiVq5Q4o=',
+    1
+);
+GO
+
+-- Verificar
+SELECT UsuarioId, Nombre, Email, PasswordHash, Activo
+FROM Usuario
+WHERE Email = 'admin@sigesa.com';
+GO

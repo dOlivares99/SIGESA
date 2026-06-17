@@ -13,49 +13,103 @@
     </div>
 </div>
 
-<div class="card" style="max-width:560px;">
-    <div class="card-body p-4">
+<div class="row g-4">
 
-        @if (!ViewData.ModelState.IsValid)
-        {
-            <div class="alert alert-danger py-2">
-                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+    <!-- Columna izquierda: formulario -->
+    <div class="col-12 col-lg-7">
+        <div class="card h-100">
+            <div class="card-body p-4">
+
+                @if (!ViewData.ModelState.IsValid)
                 {
-                    <div><i class="ti ti-alert-circle me-1"></i>@error.ErrorMessage</div>
+                    <div class="alert alert-danger py-2">
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <div><i class="ti ti-alert-circle me-1"></i>@error.ErrorMessage</div>
+                        }
+                    </div>
                 }
-            </div>
-        }
 
-        <form asp-action="Editar" asp-route-id="@Model.ClienteId" method="post">
-            @Html.AntiForgeryToken()
-            <div class="mb-3">
-                <label asp-for="Nombre" class="form-label fw-medium">Nombre completo</label>
-                <input asp-for="Nombre" class="form-control" />
-                <span asp-validation-for="Nombre" class="text-danger small"></span>
+                <form asp-action="Editar" asp-route-id="@Model.ClienteId" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label asp-for="Nombre" class="form-label fw-medium">Nombre completo</label>
+                        <input asp-for="Nombre" class="form-control" />
+                        <span asp-validation-for="Nombre" class="text-danger small"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Documento" class="form-label fw-medium">Número de documento</label>
+                        <input asp-for="Documento" class="form-control" />
+                        <span asp-validation-for="Documento" class="text-danger small"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Telefono" class="form-label fw-medium">Teléfono</label>
+                        <input asp-for="Telefono" class="form-control" />
+                        <span asp-validation-for="Telefono" class="text-danger small"></span>
+                    </div>
+                    <div class="mb-4">
+                        <label asp-for="Email" class="form-label fw-medium">
+                            Correo electrónico <span class="text-muted fw-normal">(opcional)</span>
+                        </label>
+                        <input asp-for="Email" class="form-control" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="ti ti-device-floppy me-1"></i> Guardar cambios
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+                    </div>
+                </form>
+
             </div>
-            <div class="mb-3">
-                <label asp-for="Documento" class="form-label fw-medium">Número de documento</label>
-                <input asp-for="Documento" class="form-control" />
-                <span asp-validation-for="Documento" class="text-danger small"></span>
-            </div>
-            <div class="mb-3">
-                <label asp-for="Telefono" class="form-label fw-medium">Teléfono</label>
-                <input asp-for="Telefono" class="form-control" />
-                <span asp-validation-for="Telefono" class="text-danger small"></span>
-            </div>
-            <div class="mb-4">
-                <label asp-for="Email" class="form-label fw-medium">
-                    Correo electrónico <span class="text-muted fw-normal">(opcional)</span>
-                </label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger small"></span>
-            </div>
-            <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-primary px-4">
-                    <i class="ti ti-device-floppy me-1"></i> Guardar cambios
-                </button>
-                <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
-            </div>
-        </form>
+        </div>
     </div>
+
+    <!-- Columna derecha: info -->
+    <div class="col-12 col-lg-5">
+        <div class="card h-100" style="background:#f8f7ff;border:1.5px solid #ece9ff;">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center"
+                         style="width:40px;height:40px;background:#534AB7;">
+                        <span class="text-white fw-bold">
+                            @Model.Nombre.Substring(0, 1).ToUpper()
+                        </span>
+                    </div>
+                    <div>
+                        <div class="fw-semibold" style="color:#534AB7;">Datos actuales</div>
+                        <small class="text-muted">Registro del cliente</small>
+                    </div>
+                </div>
+                <hr style="border-color:#ece9ff;">
+                <div class="mb-3">
+                    <small class="text-muted d-block mb-1">Nombre</small>
+                    <span class="fw-medium">@Model.Nombre</span>
+                </div>
+                <div class="mb-3">
+                    <small class="text-muted d-block mb-1">Documento</small>
+                    <span class="fw-medium">@Model.Documento</span>
+                </div>
+                <div class="mb-3">
+                    <small class="text-muted d-block mb-1">Teléfono</small>
+                    <span class="fw-medium">@Model.Telefono</span>
+                </div>
+                <div class="mb-3">
+                    <small class="text-muted d-block mb-1">Correo</small>
+                    <span class="fw-medium">@(string.IsNullOrEmpty(Model.Email) ? "—" : Model.Email)</span>
+                </div>
+                <hr style="border-color:#ece9ff;">
+                <div class="d-flex align-items-start gap-2 mt-3">
+                    <i class="ti ti-info-circle mt-1" style="color:#534AB7;"></i>
+                    <small class="text-muted">
+                        El documento de identidad debe ser único en el sistema.
+                        Verifica que el número sea correcto antes de guardar.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>

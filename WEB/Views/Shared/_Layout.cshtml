@@ -9,113 +9,253 @@
     <link href="https://cdn.jsdelivr.net/npm/@@tabler/icons-webfont@latest/tabler-icons.min.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <style>
-        * { font-family: 'Inter', sans-serif; }
-        body { background-color: #F5F4EF; }
+            * {
+                font-family: 'Inter', sans-serif;
+            }
 
-        /* Sidebar */
-        .sidebar {
-            width: 240px;
-            min-height: 100vh;
-            background: linear-gradient(180deg, #534AB7 0%, #3d3490 100%);
-            position: fixed;
-            top: 0; left: 0;
-            padding: 1.5rem 1rem;
-            z-index: 100;
-        }
-        .sidebar .brand {
-            color: white;
-            font-weight: 700;
-            font-size: 1.25rem;
-            padding: 0.5rem 0.75rem 1.5rem;
-            border-bottom: 1px solid rgba(255,255,255,0.15);
-            margin-bottom: 1rem;
-        }
-        .sidebar .brand small {
-            display: block;
-            font-size: 0.7rem;
-            font-weight: 400;
-            opacity: 0.7;
-        }
-        .sidebar .nav-link {
-            color: rgba(255,255,255,0.75);
-            border-radius: 10px;
-            padding: 0.6rem 0.75rem;
-            font-size: 0.875rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 0.15s;
-        }
-        .sidebar .nav-link:hover,
-        .sidebar .nav-link.active {
-            background: rgba(255,255,255,0.15);
-            color: white;
-        }
-        .sidebar .nav-section {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: rgba(255,255,255,0.4);
-            padding: 1rem 0.75rem 0.25rem;
-        }
+            body {
+                background-color: #F5F4EF;
+            }
 
-        /* Main content */
-        .main-content {
-            margin-left: 240px;
-            padding: 1.5rem;
-            min-height: 100vh;
-        }
+            /* Sidebar */
+            .sidebar {
+                width: 240px;
+                min-height: 100vh;
+                background: linear-gradient(180deg, #534AB7 0%, #3d3490 100%);
+                position: fixed;
+                top: 0;
+                left: 0;
+                padding: 1.5rem 1rem;
+                z-index: 100;
+            }
 
-        /* Topbar */
-        .topbar {
-            background: white;
-            border-radius: 12px;
-            padding: 0.75rem 1.25rem;
-            margin-bottom: 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-        }
-        .topbar .page-title {
-            font-weight: 600;
-            font-size: 1rem;
-            color: #1E1E1E;
-        }
-        .topbar .user-info {
-            font-size: 0.825rem;
-            color: #555;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
+                .sidebar .brand {
+                    color: white;
+                    font-weight: 700;
+                    font-size: 1.25rem;
+                    padding: 0.5rem 0.75rem 1.5rem;
+                    border-bottom: 1px solid rgba(255,255,255,0.15);
+                    margin-bottom: 1rem;
+                }
 
-        /* Cards */
-        .card {
-            border: none;
-            border-radius: 16px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-        }
+                    .sidebar .brand small {
+                        display: block;
+                        font-size: 0.7rem;
+                        font-weight: 400;
+                        opacity: 0.7;
+                    }
 
-        /* Buttons */
-        .btn-primary { background-color: #534AB7; border-color: #534AB7; }
-        .btn-primary:hover { background-color: #4239a0; border-color: #4239a0; }
-        .btn-outline-primary { color: #534AB7; border-color: #534AB7; }
-        .btn-outline-primary:hover { background-color: #534AB7; color: white; }
+                .sidebar .nav-link {
+                    color: rgba(255,255,255,0.75);
+                    border-radius: 10px;
+                    padding: 0.6rem 0.75rem;
+                    font-size: 0.875rem;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    transition: all 0.15s;
+                }
 
-        /* Badges */
-        .badge-activo { background-color: #0F6E56; }
-        .badge-pendiente { background-color: #854F0B; }
-        .badge-cancelado { background-color: #993C1D; }
+                    .sidebar .nav-link:hover,
+                    .sidebar .nav-link.active {
+                        background: rgba(255,255,255,0.15);
+                        color: white;
+                    }
 
-        /* Alerts */
-        .alert-success { background-color: #e6f4f0; border-color: #0F6E56; color: #0F6E56; }
-        .alert-danger  { background-color: #fdf0ed; border-color: #993C1D; color: #993C1D; }
-        .alert-warning { background-color: #fdf5e6; border-color: #854F0B; color: #854F0B; }
+                .sidebar .nav-section {
+                    font-size: 0.7rem;
+                    text-transform: uppercase;
+                    letter-spacing: 0.08em;
+                    color: rgba(255,255,255,0.4);
+                    padding: 1rem 0.75rem 0.25rem;
+                }
 
-        /* Solo Admin */
-        .admin-only { display: none; }
-        .rol-administrador .admin-only { display: flex; }
+            /* Main content */
+            .main-content {
+                margin-left: 240px;
+                padding: 1.5rem;
+                min-height: 100vh;
+            }
+
+            /* Topbar */
+            .topbar {
+                background: white;
+                border-radius: 12px;
+                padding: 0.75rem 1.25rem;
+                margin-bottom: 1.5rem;
+                display: flex;
+                justify-content: flex-end;
+                align-items: center;
+                box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            }
+
+                .topbar .user-info {
+                    font-size: 0.825rem;
+                    color: #555;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                }
+
+            /* Cards */
+            .card {
+                border: none;
+                border-radius: 16px;
+                box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            }
+
+            /* Buttons */
+            .btn-primary {
+                background-color: #534AB7;
+                border-color: #534AB7;
+            }
+
+                .btn-primary:hover {
+                    background-color: #4239a0;
+                    border-color: #4239a0;
+                }
+
+            .btn-outline-primary {
+                color: #534AB7;
+                border-color: #534AB7;
+            }
+
+                .btn-outline-primary:hover {
+                    background-color: #534AB7;
+                    color: white;
+                }
+
+            /* Badges */
+            .badge-activo {
+                background-color: #0F6E56;
+            }
+
+            .badge-pendiente {
+                background-color: #854F0B;
+            }
+
+            .badge-cancelado {
+                background-color: #993C1D;
+            }
+
+            /* Alerts */
+            .alert-success {
+                background-color: #e6f4f0;
+                border-color: #0F6E56;
+                color: #0F6E56;
+            }
+
+            .alert-danger {
+                background-color: #fdf0ed;
+                border-color: #993C1D;
+                color: #993C1D;
+            }
+
+            .alert-warning {
+                background-color: #fdf5e6;
+                border-color: #854F0B;
+                color: #854F0B;
+            }
+
+            /* Solo Admin */
+            .admin-only {
+                display: none;
+            }
+
+            .rol-administrador .admin-only {
+                display: flex;
+            }
+
+            /* Toast container */
+            .toast-container {
+                position: fixed;
+                top: 1.5rem;
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 9999;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            /* Toasts personalizados */
+            .toast-sigesa {
+                min-width: 300px;
+                max-width: 380px;
+                border: none;
+                border-radius: 12px;
+                box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+                overflow: hidden;
+                opacity: 1;
+                transition: opacity 0.3s ease;
+            }
+
+                .toast-sigesa .toast-header {
+                    border-bottom: none;
+                    padding: 0.65rem 0.85rem 0;
+                    font-size: 0.8rem;
+                    font-weight: 600;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.4rem;
+                }
+
+                .toast-sigesa .toast-body {
+                    padding: 0.25rem 0.85rem 0.75rem;
+                    font-size: 0.85rem;
+                }
+
+                /* Botón cerrar custom */
+                .toast-sigesa .toast-close {
+                    margin-left: auto;
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                    font-size: 1rem;
+                    line-height: 1;
+                    padding: 0 0 0 0.5rem;
+                    opacity: 0.6;
+                    transition: opacity 0.15s;
+                }
+
+                    .toast-sigesa .toast-close:hover {
+                        opacity: 1;
+                    }
+
+                /* Variantes de color */
+                .toast-sigesa.toast-success,
+                .toast-sigesa.toast-success .toast-header,
+                .toast-sigesa.toast-success .toast-body {
+                    background-color: #e6f4f0;
+                    color: #0F6E56;
+                }
+
+                    .toast-sigesa.toast-success .toast-close {
+                        color: #0F6E56;
+                    }
+
+                .toast-sigesa.toast-error,
+                .toast-sigesa.toast-error .toast-header,
+                .toast-sigesa.toast-error .toast-body {
+                    background-color: #fdf0ed;
+                    color: #993C1D;
+                }
+
+                    .toast-sigesa.toast-error .toast-close {
+                        color: #993C1D;
+                    }
+
+                .toast-sigesa.toast-warning,
+                .toast-sigesa.toast-warning .toast-header,
+                .toast-sigesa.toast-warning .toast-body {
+                    background-color: #fdf5e6;
+                    color: #854F0B;
+                }
+
+                    .toast-sigesa.toast-warning .toast-close {
+                        color: #854F0B;
+                    }
     </style>
 </head>
 <body class="rol-@(Context.Session.GetString("RolNombre")?.ToLower() ?? "")">
@@ -172,7 +312,6 @@
     <div class="main-content">
         <!-- Topbar -->
         <div class="topbar">
-            <span class="page-title">@ViewData["Title"]</span>
             <div class="user-info">
                 <i class="ti ti-user-circle"></i>
                 @Context.Session.GetString("UsuarioNombre")
@@ -186,24 +325,67 @@
             </div>
         </div>
 
-        <!-- Alerts globales -->
-        @if (TempData["Exito"] != null)
-        {
-            <div class="alert alert-success mb-3">
-                <i class="ti ti-circle-check me-1"></i> @TempData["Exito"]
-            </div>
-        }
-        @if (TempData["Error"] != null)
-        {
-            <div class="alert alert-danger mb-3">
-                <i class="ti ti-alert-circle me-1"></i> @TempData["Error"]
-            </div>
-        }
-
         @RenderBody()
     </div>
 
+   
+    <div class="toast-container" id="toastContainer"></div>
+
+    
+    @if (TempData["Exito"] != null)
+    {
+        <span id="toast-exito" data-msg="@TempData["Exito"]" class="d-none"></span>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <span id="toast-error" data-msg="@TempData["Error"]" class="d-none"></span>
+    }
+    @if (TempData["Advertencia"] != null)
+    {
+        <span id="toast-advertencia" data-msg="@TempData["Advertencia"]" class="d-none"></span>
+    }
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        function showToast(type, icon, title, message) {
+        const container = document.getElementById('toastContainer');
+
+        const toast = document.createElement('div');
+        toast.className = `toast-sigesa toast-${type}`;
+        toast.innerHTML = `
+        <div class="toast-header">
+        <i class="ti ${icon}"></i>
+        <strong class="me-auto ms-1">${title}</strong>
+        <button class="toast-close" title="Cerrar">&#x2715;</button>
+        </div>
+        <div class="toast-body">${message}</div>
+        `;
+
+        const cerrar = () => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+        };
+
+        toast.querySelector('.toast-close').addEventListener('click', cerrar);
+        container.appendChild(toast);
+
+        
+        setTimeout(cerrar, 4000);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+        const exito = document.getElementById('toast-exito');
+        if (exito) showToast('success', 'ti-circle-check', 'Éxito', exito.dataset.msg);
+
+        const error = document.getElementById('toast-error');
+        if (error) showToast('error', 'ti-alert-circle', 'Error', error.dataset.msg);
+
+        const adv = document.getElementById('toast-advertencia');
+        if (adv) showToast('warning', 'ti-alert-triangle', 'Atención', adv.dataset.msg);
+        });
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

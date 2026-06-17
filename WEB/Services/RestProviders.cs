@@ -96,4 +96,19 @@ public class RestProvider : IRestProvider
             throw RestProviderHelpers.ThrowError(endpoint, ex);
         }
     }
+
+    public async Task<string> PatchAsync(string endpoint, string json)
+    {
+        try
+        {
+            var response = await RestProviderHelpers
+                .CreateHttpClient(_baseUrl)
+                .PatchAsync(endpoint, RestProviderHelpers.CreateContent(json));
+            return await RestProviderHelpers.GetResponse(response);
+        }
+        catch (Exception ex)
+        {
+            throw RestProviderHelpers.ThrowError(endpoint, ex);
+        }
+    }
 }

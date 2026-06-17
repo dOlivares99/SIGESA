@@ -1,21 +1,23 @@
-﻿@model List<WEB.Models.ViewModels.ClienteViewModel>
+﻿@model List<WEB.Models.ViewModels.PaqueteViewModel>
 @{
-    ViewData["Title"] = "Clientes";
+    ViewData["Title"] = "Paquetes";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h5 class="fw-bold mb-0">Clientes</h5>
-        <small class="text-muted">Listado de clientes registrados</small>
+        <h5 class="fw-bold mb-0">Catálogo de paquetes</h5>
+        <small class="text-muted">Gestiona los paquetes disponibles para eventos</small>
     </div>
     <a asp-action="Crear" class="btn btn-primary btn-sm px-3">
-        <i class="ti ti-plus me-1"></i> Nuevo cliente
+        <i class="ti ti-plus me-1"></i> Nuevo paquete
     </a>
 </div>
 
-@if (ViewBag.Error != null)
+@if (TempData["Advertencia"] != null)
 {
-    <div class="alert alert-danger"><i class="ti ti-alert-circle me-1"></i>@ViewBag.Error</div>
+    <div class="alert alert-warning">
+        <i class="ti ti-alert-triangle me-1"></i> @TempData["Advertencia"]
+    </div>
 }
 
 <div class="card">
@@ -23,7 +25,7 @@
 
         <div class="d-flex justify-content-between align-items-center mb-3">
             <input type="text" id="searchInput" class="form-control form-control-sm"
-                   placeholder="Buscar por nombre, documento o correo..."
+                   placeholder="Buscar por nombre o descripción..."
                    style="max-width:300px;">
             <small class="text-muted" id="paginationInfo"></small>
         </div>
@@ -33,53 +35,72 @@
                 <tr>
                     <th class="ps-3 py-3" style="color:#534AB7;">#</th>
                     <th class="py-3" style="color:#534AB7;">Nombre</th>
-                    <th class="py-3" style="color:#534AB7;">Documento</th>
-                    <th class="py-3" style="color:#534AB7;">Teléfono</th>
-                    <th class="py-3" style="color:#534AB7;">Correo</th>
-                    <th class="py-3" style="color:#534AB7;">Registro</th>
+                    <th class="py-3" style="color:#534AB7;">Precio base</th>
+                    <th class="py-3" style="color:#534AB7;">Máx. personas</th>
+                    <th class="py-3" style="color:#534AB7;">Duración</th>
+                    <th class="py-3" style="color:#534AB7;">Estado</th>
                     <th class="py-3" style="color:#534AB7;">Acciones</th>
                 </tr>
             </thead>
             <tbody id="tableBody">
-                @foreach (var c in Model)
+                @foreach (var p in Model)
                 {
-                    <tr>
-                        <td class="ps-3">@c.ClienteId</td>
+                    <tr class="@(!p.Activo ? "opacity-50" : "")">
+                        <td class="ps-3">@p.PaqueteId</td>
                         <td>
-                            <div class="d-flex align-items-center gap-2">
-                                <div class="rounded-circle d-flex align-items-center justify-content-center"
-                                     style="width:32px;height:32px;background:#f0eeff;color:#534AB7;font-weight:600;font-size:0.8rem;">
-                                    @c.Nombre.Substring(0, 1).ToUpper()
-                                </div>
-                                @c.Nombre
-                            </div>
+                            <div class="fw-medium">@p.Nombre</div>
+                            @if (!string.IsNullOrEmpty(p.Descripcion))
+                            {
+                                <small class="text-muted">
+                                    @(p.Descripcion.Length > 60
+                                        ? p.Descripcion.Substring(0, 60) + "…"
+                                        : p.Descripcion)
+                                </small>
+                            }
                         </td>
-                        <td class="text-muted small">@c.Documento</td>
-                        <td class="text-muted small">@c.Telefono</td>
-                        <td class="text-muted small">@(c.Email ?? "—")</td>
-                        <td class="text-muted small">@c.FechaRegistro.ToString("dd/MM/yyyy")</td>
+                        <td class="fw-medium">₡@p.PrecioBase.ToString("N2")</td>
+                        <td class="text-muted">@p.MaxPersonas personas</td>
+                        <td class="text-muted">@p.DuracionHoras h</td>
                         <td>
-                            <a asp-action="Historial" asp-route-id="@c.ClienteId"
-                               class="btn btn-sm btn-outline-secondary" title="Ver historial">
-                                <i class="ti ti-history"></i>
-                            </a>
-                            <a asp-action="Editar" asp-route-id="@c.ClienteId"
+                            @if (p.Activo)
+                            {
+                                <span class="badge rounded-pill"
+                                      style="background:#e6f4f0;color:#0F6E56;">
+                                    <i class="ti ti-circle-check me-1"></i>Activo
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge rounded-pill bg-secondary">Inactivo</span>
+                            }
+                        </td>
+                        <td>
+                            <a asp-action="Editar" asp-route-id="@p.PaqueteId"
                                class="btn btn-sm btn-outline-secondary" title="Editar">
                                 <i class="ti ti-edit"></i>
                             </a>
+                            <form asp-action="CambiarActivo" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@p.PaqueteId" />
+                                <input type="hidden" name="activo" value="@(!p.Activo ? "true" : "false")" />
+                                <button type="submit"
+                                        class="btn btn-sm @(p.Activo ? "btn-outline-danger" : "btn-outline-success")"
+                                        title="@(p.Activo ? "Desactivar" : "Activar")"
+                                        onclick="return confirm('@(p.Activo ? "¿Desactivar este paquete?" : "¿Activar este paquete?")')">
+                                    <i class="ti @(p.Activo ? "ti-toggle-left" : "ti-toggle-right")"></i>
+                                </button>
+                            </form>
                         </td>
                     </tr>
                 }
             </tbody>
         </table>
 
-        <!-- Fila vacía cuando no hay resultados -->
         <div id="emptyMsg" class="text-center text-muted py-5 d-none">
             <i class="ti ti-search-off" style="font-size:2rem;"></i>
             <p class="mt-2 mb-0">No se encontraron resultados</p>
         </div>
 
-        <!-- Paginación -->
         <div class="d-flex justify-content-center mt-3" id="pagination"></div>
 
     </div>
@@ -91,12 +112,12 @@
         let currentPage = 1;
         let filteredRows = [];
 
-        const searchInput   = document.getElementById('searchInput');
-        const tableBody     = document.getElementById('tableBody');
-        const allRows       = Array.from(tableBody.querySelectorAll('tr'));
-        const pagination    = document.getElementById('pagination');
+        const searchInput    = document.getElementById('searchInput');
+        const tableBody      = document.getElementById('tableBody');
+        const allRows        = Array.from(tableBody.querySelectorAll('tr'));
+        const pagination     = document.getElementById('pagination');
         const paginationInfo = document.getElementById('paginationInfo');
-        const emptyMsg      = document.getElementById('emptyMsg');
+        const emptyMsg       = document.getElementById('emptyMsg');
 
         function normalize(str) {
             return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -127,7 +148,6 @@
                 ? `Mostrando ${Math.min(start + 1, total)}–${Math.min(end, total)} de ${total}`
                 : '';
 
-            // Botones de paginación
             pagination.innerHTML = '';
             if (totalPages <= 1) return;
 
@@ -153,7 +173,6 @@
                 ul.appendChild(makeBtn(i, i, false, i === currentPage));
             }
             ul.appendChild(makeBtn('&raquo;', currentPage + 1, currentPage === totalPages, false));
-
             pagination.appendChild(ul);
         }
 

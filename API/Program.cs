@@ -15,6 +15,10 @@ builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
 builder.Services.AddScoped<IClienteService, ClienteService>();
 builder.Services.AddScoped<IUtilitario, Utilitario>();
+builder.Services.AddScoped<IPaqueteRepository, PaqueteRepository>();
+builder.Services.AddScoped<IPaqueteService, PaqueteService>();
+builder.Services.AddScoped<IServicioRepository, ServicioRepository>();
+builder.Services.AddScoped<IServicioService, ServicioService>();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
