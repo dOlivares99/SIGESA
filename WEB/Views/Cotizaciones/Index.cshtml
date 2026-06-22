@@ -1,15 +1,15 @@
-@model List<WEB.Models.ViewModels.ClienteViewModel>
+@* @model List<WEB.Models.ViewModels.CotizacionViewModel>
 @{
-    ViewData["Title"] = "Clientes";
+    ViewData["Title"] = "Cotizaciones";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h5 class="fw-bold mb-0">Clientes</h5>
-        <small class="text-muted">Listado de clientes registrados</small>
+        <h5 class="fw-bold mb-0">Cotizaciones</h5>
+        <small class="text-muted">Gestiona las cotizaciones generadas para cada evento</small>
     </div>
     <a asp-action="Crear" class="btn btn-primary btn-sm px-3">
-        <i class="ti ti-plus me-1"></i> Nuevo cliente
+        <i class="ti ti-plus me-1"></i> Nueva cotización
     </a>
 </div>
 
@@ -28,8 +28,15 @@
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
             <div class="d-flex gap-2">
                 <input type="text" id="searchInput" class="form-control form-control-sm"
-                       placeholder="Buscar por nombre, documento o correo..."
+                       placeholder="Buscar por cliente o tipo de evento..."
                        style="min-width:260px;">
+                <select id="statusFilter" class="form-select form-select-sm" style="min-width:160px;">
+                    <option value="todos">Todos los estados</option>
+                    <option value="pendiente">Pendiente</option>
+                    <option value="aprobada">Aprobada</option>
+                    <option value="rechazada">Rechazada</option>
+                    <option value="vencida">Vencida</option>
+                </select>
             </div>
             <small class="text-muted" id="paginationInfo"></small>
         </div>
@@ -38,40 +45,57 @@
             <thead style="background:#f8f7ff;">
                 <tr>
                     <th class="ps-3 py-3" style="color:#534AB7;">#</th>
-                    <th class="py-3" style="color:#534AB7;">Nombre</th>
-                    <th class="py-3" style="color:#534AB7;">Documento</th>
-                    <th class="py-3" style="color:#534AB7;">Teléfono</th>
-                    <th class="py-3" style="color:#534AB7;">Correo</th>
-                    <th class="py-3" style="color:#534AB7;">Registro</th>
+                    <th class="py-3" style="color:#534AB7;">Cliente</th>
+                    <th class="py-3" style="color:#534AB7;">Tipo de evento</th>
+                    <th class="py-3" style="color:#534AB7;">Total</th>
+                    <th class="py-3" style="color:#534AB7;">Estado</th>
+                    <th class="py-3" style="color:#534AB7;">Creación</th>
+                    <th class="py-3" style="color:#534AB7;">Vencimiento</th>
                     <th class="py-3" style="color:#534AB7;">Acciones</th>
                 </tr>
             </thead>
             <tbody id="tableBody">
                 @foreach (var c in Model)
                 {
-                    <tr data-nombre="@c.Nombre.ToLower()"
-                        data-documento="@c.Documento.ToLower()"
-                        data-email="@(c.Email?.ToLower() ?? "")">
-                        <td class="ps-3">@c.ClienteId</td>
+                    var estadoKey = c.Estado.ToLower();
+                    var (estadoBg, estadoColor) = estadoKey switch {
+                        "aprobada"  => ("#e6f4f0", "#0F6E56"),
+                        "rechazada" => ("#ffeee8", "#993C1D"),
+                        "vencida"   => ("#f5f5f5", "#555555"),
+                        _           => ("#fff8e6", "#854F0B")
+                    };
+
+                    <tr data-cliente="@c.ClienteNombre.ToLower()"
+                        data-tipo="@c.TipoEvento.ToLower()"
+                        data-estado="@c.Estado.ToLower()">
+                        <td class="ps-3">@c.CotizacionId</td>
                         <td>
                             <div class="d-flex align-items-center gap-2">
                                 <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold"
                                      style="width:32px;height:32px;background:#f0eeff;color:#534AB7;font-size:0.8rem;">
-                                    @c.Nombre.Substring(0, 1).ToUpper()
+                                    @c.ClienteNombre.Substring(0, 1).ToUpper()
                                 </div>
-                                <span class="fw-medium">@c.Nombre</span>
+                                <span class="fw-medium">@c.ClienteNombre</span>
                             </div>
                         </td>
-                        <td class="text-muted small">@c.Documento</td>
-                        <td class="text-muted small">@c.Telefono</td>
-                        <td class="text-muted small">@(c.Email ?? "—")</td>
-                        <td class="text-muted small">@c.FechaRegistro.ToString("dd/MM/yyyy")</td>
+                        <td class="text-muted small">@c.TipoEvento</td>
+                        <td class="fw-medium">₡@c.Total.ToString("N2")</td>
                         <td>
-                            <a asp-action="Historial" asp-route-id="@c.ClienteId"
-                               class="btn btn-sm btn-outline-secondary" title="Ver historial">
-                                <i class="ti ti-history"></i>
+                            <span class="badge rounded-pill px-3"
+                                  style="background:@estadoBg;color:@estadoColor;">
+                                @c.Estado
+                            </span>
+                        </td>
+                        <td class="text-muted small">@c.FechaCreacion.ToString("dd/MM/yyyy")</td>
+                        <td class="text-muted small">
+                            @(c.FechaVencimiento.HasValue ? c.FechaVencimiento.Value.ToString("dd/MM/yyyy") : "—")
+                        </td>
+                        <td>
+                            <a asp-action="Detalle" asp-route-id="@c.CotizacionId"
+                               class="btn btn-sm btn-outline-secondary" title="Ver detalle">
+                                <i class="ti ti-eye"></i>
                             </a>
-                            <a asp-action="Editar" asp-route-id="@c.ClienteId"
+                            <a asp-action="Editar" asp-route-id="@c.CotizacionId"
                                class="btn btn-sm btn-outline-secondary" title="Editar">
                                 <i class="ti ti-edit"></i>
                             </a>
@@ -98,6 +122,7 @@
     let filteredRows = [];
 
     const searchInput    = document.getElementById('searchInput');
+    const statusFilter   = document.getElementById('statusFilter');
     const tableBody      = document.getElementById('tableBody');
     const allRows        = Array.from(tableBody.querySelectorAll('tr'));
     const pagination     = document.getElementById('pagination');
@@ -109,13 +134,15 @@
     }
 
     function filter() {
-        const q = normalize(searchInput.value.trim());
+        const q      = normalize(searchInput.value.trim());
+        const estado = statusFilter.value;
 
         filteredRows = allRows.filter(r => {
-            return !q ||
-                normalize(r.dataset.nombre).includes(q) ||
-                normalize(r.dataset.documento).includes(q) ||
-                normalize(r.dataset.email).includes(q);
+            const matchSearch = !q ||
+                normalize(r.dataset.cliente).includes(q) ||
+                normalize(r.dataset.tipo).includes(q);
+            const matchEstado = estado === 'todos' || r.dataset.estado === estado;
+            return matchSearch && matchEstado;
         });
 
         currentPage = 1;
@@ -135,7 +162,7 @@
         emptyMsg.classList.toggle('d-none', total > 0);
 
         paginationInfo.textContent = total > 0
-            ? `Mostrando ${Math.min(start + 1, total)}–${Math.min(end, total)} de ${total} cliente${total !== 1 ? 's' : ''}`
+            ? `Mostrando ${Math.min(start + 1, total)}–${Math.min(end, total)} de ${total} cotización${total !== 1 ? 'es' : ''}`
             : '';
 
         pagination.innerHTML = '';
@@ -191,6 +218,7 @@
     }
 
     searchInput.addEventListener('input', filter);
+    statusFilter.addEventListener('change', filter);
     filter();
 </script>
-}
+} *@

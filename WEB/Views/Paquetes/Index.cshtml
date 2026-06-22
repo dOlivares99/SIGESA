@@ -1,4 +1,4 @@
-﻿@model List<WEB.Models.ViewModels.PaqueteViewModel>
+@model List<WEB.Models.ViewModels.PaqueteViewModel>
 @{
     ViewData["Title"] = "Paquetes";
 }
@@ -13,20 +13,33 @@
     </a>
 </div>
 
+@if (TempData["Exito"] != null)
+{
+    <div class="alert alert-success"><i class="ti ti-circle-check me-1"></i>@TempData["Exito"]</div>
+}
 @if (TempData["Advertencia"] != null)
 {
-    <div class="alert alert-warning">
-        <i class="ti ti-alert-triangle me-1"></i> @TempData["Advertencia"]
-    </div>
+    <div class="alert alert-warning"><i class="ti ti-alert-triangle me-1"></i>@TempData["Advertencia"]</div>
+}
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger"><i class="ti ti-alert-circle me-1"></i>@ViewBag.Error</div>
 }
 
 <div class="card">
     <div class="card-body">
 
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <input type="text" id="searchInput" class="form-control form-control-sm"
-                   placeholder="Buscar por nombre o descripción..."
-                   style="max-width:300px;">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <div class="d-flex gap-2">
+                <input type="text" id="searchInput" class="form-control form-control-sm"
+                       placeholder="Buscar por nombre o descripción..."
+                       style="min-width:260px;">
+                <select id="statusFilter" class="form-select form-select-sm" style="min-width:140px;">
+                    <option value="todos">Todos</option>
+                    <option value="activo">Activo</option>
+                    <option value="inactivo">Inactivo</option>
+                </select>
+            </div>
             <small class="text-muted" id="paginationInfo"></small>
         </div>
 
@@ -45,7 +58,9 @@
             <tbody id="tableBody">
                 @foreach (var p in Model)
                 {
-                    <tr class="@(!p.Activo ? "opacity-50" : "")">
+                    <tr data-nombre="@p.Nombre.ToLower()"
+                        data-descripcion="@(p.Descripcion?.ToLower() ?? "")"
+                        data-estado="@(p.Activo ? "activo" : "inactivo")">
                         <td class="ps-3">@p.PaqueteId</td>
                         <td>
                             <div class="fw-medium">@p.Nombre</div>
@@ -64,8 +79,7 @@
                         <td>
                             @if (p.Activo)
                             {
-                                <span class="badge rounded-pill"
-                                      style="background:#e6f4f0;color:#0F6E56;">
+                                <span class="badge rounded-pill" style="background:#e6f4f0;color:#0F6E56;">
                                     <i class="ti ti-circle-check me-1"></i>Activo
                                 </span>
                             }
@@ -107,76 +121,111 @@
 </div>
 
 @section Scripts {
-    <script>
-        const PAGE_SIZE = 10;
-        let currentPage = 1;
-        let filteredRows = [];
+<script>
+    const PAGE_SIZE = 10;
+    let currentPage = 1;
+    let filteredRows = [];
 
-        const searchInput    = document.getElementById('searchInput');
-        const tableBody      = document.getElementById('tableBody');
-        const allRows        = Array.from(tableBody.querySelectorAll('tr'));
-        const pagination     = document.getElementById('pagination');
-        const paginationInfo = document.getElementById('paginationInfo');
-        const emptyMsg       = document.getElementById('emptyMsg');
+    const searchInput    = document.getElementById('searchInput');
+    const statusFilter   = document.getElementById('statusFilter');
+    const tableBody      = document.getElementById('tableBody');
+    const allRows        = Array.from(tableBody.querySelectorAll('tr'));
+    const pagination     = document.getElementById('pagination');
+    const paginationInfo = document.getElementById('paginationInfo');
+    const emptyMsg       = document.getElementById('emptyMsg');
 
-        function normalize(str) {
-            return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-        }
+    function normalize(str) {
+        return str.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    }
 
-        function filter() {
-            const q = normalize(searchInput.value.trim());
-            filteredRows = q
-                ? allRows.filter(r => normalize(r.innerText).includes(q))
-                : [...allRows];
-            currentPage = 1;
-            render();
-        }
+    function filter() {
+        const q      = normalize(searchInput.value.trim());
+        const estado = statusFilter.value;
 
-        function render() {
-            const total = filteredRows.length;
-            const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-            currentPage = Math.min(currentPage, totalPages);
-            const start = (currentPage - 1) * PAGE_SIZE;
-            const end   = start + PAGE_SIZE;
+        filteredRows = allRows.filter(r => {
+            const matchSearch = !q ||
+                normalize(r.dataset.nombre).includes(q) ||
+                normalize(r.dataset.descripcion).includes(q);
 
-            allRows.forEach(r => r.classList.add('d-none'));
-            filteredRows.slice(start, end).forEach(r => r.classList.remove('d-none'));
+            const matchEstado = estado === 'todos' || r.dataset.estado === estado;
 
-            emptyMsg.classList.toggle('d-none', total > 0);
+            return matchSearch && matchEstado;
+        });
 
-            paginationInfo.textContent = total > 0
-                ? `Mostrando ${Math.min(start + 1, total)}–${Math.min(end, total)} de ${total}`
-                : '';
+        currentPage = 1;
+        render();
+    }
 
-            pagination.innerHTML = '';
-            if (totalPages <= 1) return;
+    function render() {
+        const total      = filteredRows.length;
+        const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+        currentPage      = Math.min(currentPage, totalPages);
+        const start      = (currentPage - 1) * PAGE_SIZE;
+        const end        = start + PAGE_SIZE;
 
-            const ul = document.createElement('ul');
-            ul.className = 'pagination pagination-sm mb-0';
+        allRows.forEach(r => r.classList.add('d-none'));
+        filteredRows.slice(start, end).forEach(r => r.classList.remove('d-none'));
 
-            const makeBtn = (label, page, disabled, active) => {
-                const li = document.createElement('li');
-                li.className = `page-item ${disabled ? 'disabled' : ''} ${active ? 'active' : ''}`;
-                li.innerHTML = `<a class="page-link" href="#" style="${active ? 'background:#534AB7;border-color:#534AB7;' : ''}">${label}</a>`;
-                if (!disabled && !active) {
-                    li.querySelector('a').addEventListener('click', e => {
-                        e.preventDefault();
-                        currentPage = page;
-                        render();
-                    });
-                }
-                return li;
-            };
+        emptyMsg.classList.toggle('d-none', total > 0);
 
-            ul.appendChild(makeBtn('&laquo;', currentPage - 1, currentPage === 1, false));
-            for (let i = 1; i <= totalPages; i++) {
-                ul.appendChild(makeBtn(i, i, false, i === currentPage));
+        paginationInfo.textContent = total > 0
+            ? `Mostrando ${Math.min(start + 1, total)}–${Math.min(end, total)} de ${total} paquete${total !== 1 ? 's' : ''}`
+            : '';
+
+        pagination.innerHTML = '';
+        if (totalPages <= 1) return;
+
+        const ul = document.createElement('ul');
+        ul.className = 'pagination pagination-sm mb-0';
+
+        const makeBtn = (label, page, disabled, active) => {
+            const li = document.createElement('li');
+            li.className = `page-item ${disabled ? 'disabled' : ''} ${active ? 'active' : ''}`;
+            const a = document.createElement('a');
+            a.className = 'page-link';
+            a.href = '#';
+            a.innerHTML = label;
+            if (active) {
+                a.style.background = '#534AB7';
+                a.style.borderColor = '#534AB7';
             }
-            ul.appendChild(makeBtn('&raquo;', currentPage + 1, currentPage === totalPages, false));
-            pagination.appendChild(ul);
-        }
+            if (!disabled && !active) {
+                a.addEventListener('click', e => {
+                    e.preventDefault();
+                    currentPage = page;
+                    render();
+                });
+            }
+            li.appendChild(a);
+            return li;
+        };
 
-        searchInput.addEventListener('input', filter);
-        filter();
-    </script>
+        ul.appendChild(makeBtn('&laquo;', currentPage - 1, currentPage === 1, false));
+
+        const showPages = [];
+        if (currentPage > 3) showPages.push(1, '...');
+        for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) {
+            showPages.push(i);
+        }
+        if (currentPage < totalPages - 2) showPages.push('...', totalPages);
+
+        showPages.forEach(p => {
+            if (p === '...') {
+                const li = document.createElement('li');
+                li.className = 'page-item disabled';
+                li.innerHTML = '<a class="page-link">…</a>';
+                ul.appendChild(li);
+            } else {
+                ul.appendChild(makeBtn(p, p, false, p === currentPage));
+            }
+        });
+
+        ul.appendChild(makeBtn('&raquo;', currentPage + 1, currentPage === totalPages, false));
+        pagination.appendChild(ul);
+    }
+
+    searchInput.addEventListener('input', filter);
+    statusFilter.addEventListener('change', filter);
+    filter();
+</script>
 }

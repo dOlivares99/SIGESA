@@ -1,15 +1,15 @@
-@model List<WEB.Models.ViewModels.ClienteViewModel>
+@* @model List<WEB.Models.ViewModels.PagoViewModel>
 @{
-    ViewData["Title"] = "Clientes";
+    ViewData["Title"] = "Pagos";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h5 class="fw-bold mb-0">Clientes</h5>
-        <small class="text-muted">Listado de clientes registrados</small>
+        <h5 class="fw-bold mb-0">Pagos</h5>
+        <small class="text-muted">Registro de pagos asociados a eventos</small>
     </div>
     <a asp-action="Crear" class="btn btn-primary btn-sm px-3">
-        <i class="ti ti-plus me-1"></i> Nuevo cliente
+        <i class="ti ti-plus me-1"></i> Registrar pago
     </a>
 </div>
 
@@ -28,8 +28,8 @@
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
             <div class="d-flex gap-2">
                 <input type="text" id="searchInput" class="form-control form-control-sm"
-                       placeholder="Buscar por nombre, documento o correo..."
-                       style="min-width:260px;">
+                       placeholder="Buscar por cliente, tipo o método de pago..."
+                       style="min-width:280px;">
             </div>
             <small class="text-muted" id="paginationInfo"></small>
         </div>
@@ -38,40 +38,47 @@
             <thead style="background:#f8f7ff;">
                 <tr>
                     <th class="ps-3 py-3" style="color:#534AB7;">#</th>
-                    <th class="py-3" style="color:#534AB7;">Nombre</th>
-                    <th class="py-3" style="color:#534AB7;">Documento</th>
-                    <th class="py-3" style="color:#534AB7;">Teléfono</th>
-                    <th class="py-3" style="color:#534AB7;">Correo</th>
-                    <th class="py-3" style="color:#534AB7;">Registro</th>
+                    <th class="py-3" style="color:#534AB7;">Cliente</th>
+                    <th class="py-3" style="color:#534AB7;">Evento</th>
+                    <th class="py-3" style="color:#534AB7;">Monto</th>
+                    <th class="py-3" style="color:#534AB7;">Fecha</th>
+                    <th class="py-3" style="color:#534AB7;">Tipo de pago</th>
+                    <th class="py-3" style="color:#534AB7;">Método</th>
                     <th class="py-3" style="color:#534AB7;">Acciones</th>
                 </tr>
             </thead>
             <tbody id="tableBody">
-                @foreach (var c in Model)
+                @foreach (var p in Model)
                 {
-                    <tr data-nombre="@c.Nombre.ToLower()"
-                        data-documento="@c.Documento.ToLower()"
-                        data-email="@(c.Email?.ToLower() ?? "")">
-                        <td class="ps-3">@c.ClienteId</td>
+                    <tr data-cliente="@p.ClienteNombre.ToLower()"
+                        data-tipo="@p.TipoPagoNombre.ToLower()"
+                        data-metodo="@p.MetodoPagoNombre.ToLower()">
+                        <td class="ps-3">@p.PagoId</td>
                         <td>
                             <div class="d-flex align-items-center gap-2">
                                 <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold"
                                      style="width:32px;height:32px;background:#f0eeff;color:#534AB7;font-size:0.8rem;">
-                                    @c.Nombre.Substring(0, 1).ToUpper()
+                                    @p.ClienteNombre.Substring(0, 1).ToUpper()
                                 </div>
-                                <span class="fw-medium">@c.Nombre</span>
+                                <span class="fw-medium">@p.ClienteNombre</span>
                             </div>
                         </td>
-                        <td class="text-muted small">@c.Documento</td>
-                        <td class="text-muted small">@c.Telefono</td>
-                        <td class="text-muted small">@(c.Email ?? "—")</td>
-                        <td class="text-muted small">@c.FechaRegistro.ToString("dd/MM/yyyy")</td>
+                        <td class="text-muted small">#@p.EventoId</td>
+                        <td class="fw-medium">₡@p.Monto.ToString("N2")</td>
+                        <td class="text-muted small">@p.FechaPago.ToString("dd/MM/yyyy")</td>
                         <td>
-                            <a asp-action="Historial" asp-route-id="@c.ClienteId"
-                               class="btn btn-sm btn-outline-secondary" title="Ver historial">
-                                <i class="ti ti-history"></i>
+                            <span class="badge rounded-pill px-3"
+                                  style="background:#f0eeff;color:#534AB7;">
+                                @p.TipoPagoNombre
+                            </span>
+                        </td>
+                        <td class="text-muted small">@p.MetodoPagoNombre</td>
+                        <td>
+                            <a asp-action="Detalle" asp-route-id="@p.PagoId"
+                               class="btn btn-sm btn-outline-secondary" title="Ver detalle">
+                                <i class="ti ti-eye"></i>
                             </a>
-                            <a asp-action="Editar" asp-route-id="@c.ClienteId"
+                            <a asp-action="Editar" asp-route-id="@p.PagoId"
                                class="btn btn-sm btn-outline-secondary" title="Editar">
                                 <i class="ti ti-edit"></i>
                             </a>
@@ -113,9 +120,9 @@
 
         filteredRows = allRows.filter(r => {
             return !q ||
-                normalize(r.dataset.nombre).includes(q) ||
-                normalize(r.dataset.documento).includes(q) ||
-                normalize(r.dataset.email).includes(q);
+                normalize(r.dataset.cliente).includes(q) ||
+                normalize(r.dataset.tipo).includes(q) ||
+                normalize(r.dataset.metodo).includes(q);
         });
 
         currentPage = 1;
@@ -135,7 +142,7 @@
         emptyMsg.classList.toggle('d-none', total > 0);
 
         paginationInfo.textContent = total > 0
-            ? `Mostrando ${Math.min(start + 1, total)}–${Math.min(end, total)} de ${total} cliente${total !== 1 ? 's' : ''}`
+            ? `Mostrando ${Math.min(start + 1, total)}–${Math.min(end, total)} de ${total} pago${total !== 1 ? 's' : ''}`
             : '';
 
         pagination.innerHTML = '';
@@ -193,4 +200,4 @@
     searchInput.addEventListener('input', filter);
     filter();
 </script>
-}
+} *@
