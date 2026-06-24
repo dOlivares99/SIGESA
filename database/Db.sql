@@ -284,3 +284,29 @@ BEGIN
     PRINT 'Tabla Auditoria creada.';
 END
 GO
+
+-- ================================================================
+-- TokenRecuperacion — Sprint 2
+-- ================================================================
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'TokenRecuperacion')
+BEGIN
+    CREATE TABLE TokenRecuperacion (
+        TokenRecuperacionId INT IDENTITY(1,1) PRIMARY KEY,
+        UsuarioId           INT NOT NULL,
+        Token               NVARCHAR(128) NOT NULL,
+        Expiracion          DATETIME2 NOT NULL,
+        Usado               BIT NOT NULL DEFAULT 0,
+        CONSTRAINT FK_TokenRecuperacion_Usuario
+            FOREIGN KEY (UsuarioId) REFERENCES Usuario(UsuarioId)
+            ON DELETE CASCADE
+    );
+    PRINT 'Tabla TokenRecuperacion creada.';
+END
+GO
+
+SET QUOTED_IDENTIFIER ON;
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_TokenRecuperacion_Token')
+    CREATE INDEX IX_TokenRecuperacion_Token
+    ON TokenRecuperacion (Token)
+    WHERE Usado = 0;
+GO
