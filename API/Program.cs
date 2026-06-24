@@ -19,6 +19,10 @@ builder.Services.AddScoped<IPaqueteRepository, PaqueteRepository>();
 builder.Services.AddScoped<IPaqueteService, PaqueteService>();
 builder.Services.AddScoped<IServicioRepository, ServicioRepository>();
 builder.Services.AddScoped<IServicioService, ServicioService>();
+builder.Services.AddScoped<IReservaRepository, ReservaRepository>();
+builder.Services.AddScoped<IReservaService, ReservaService>();
+builder.Services.AddScoped<IRecuperacionRepository, RecuperacionRepository>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>

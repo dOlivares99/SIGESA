@@ -1,0 +1,269 @@
+@model WEB.Models.ViewModels.ReservaFormViewModel
+@{
+    ViewData["Title"] = "Nueva reserva";
+}
+
+<div class="d-flex align-items-center gap-3 mb-4">
+    <a asp-action="Index" class="btn btn-sm btn-outline-secondary">
+        <i class="ti ti-arrow-left"></i>
+    </a>
+    <div>
+        <h5 class="fw-bold mb-0">Nueva reserva</h5>
+        <small class="text-muted">Completa los datos del evento</small>
+    </div>
+</div>
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger py-2 mb-3">
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <div><i class="ti ti-alert-circle me-1"></i>@error.ErrorMessage</div>
+        }
+    </div>
+}
+
+<form asp-action="Crear" method="post" id="formReserva">
+    @Html.AntiForgeryToken()
+
+    <div class="row g-4">
+
+        <!-- Columna izquierda -->
+        <div class="col-12 col-lg-7">
+            <div class="card mb-4">
+                <div class="card-body p-4">
+                    <h6 class="fw-semibold mb-3" style="color:#534AB7;">
+                        <i class="ti ti-calendar-event me-1"></i> Datos del evento
+                    </h6>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-medium">Cliente</label>
+                        <select asp-for="ClienteId" class="form-select">
+                            <option value="">— Seleccione un cliente —</option>
+                            @foreach (var c in Model.Clientes)
+                            {
+                                <option value="@c.ClienteId">@c.Nombre (@c.Documento)</option>
+                            }
+                        </select>
+                        <span asp-validation-for="ClienteId" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-medium">Tipo de evento</label>
+                        <input asp-for="TipoEvento" class="form-control"
+                               placeholder="Ej: Boda, Quinceañera, Reunión corporativa" />
+                        <span asp-validation-for="TipoEvento" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label fw-medium">Fecha del evento</label>
+                            <input asp-for="FechaEvento" type="date" class="form-control"
+                                   value="@Model.FechaEvento.ToString("yyyy-MM-dd")" />
+                            <span asp-validation-for="FechaEvento" class="text-danger small"></span>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label fw-medium">Número de personas</label>
+                            <input asp-for="NumPersonas" type="number" class="form-control" min="1" max="10000" />
+                            <span asp-validation-for="NumPersonas" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-medium">Paquete</label>
+                        <select asp-for="PaqueteId" class="form-select" id="selectPaquete"
+                                onchange="actualizarPrecioBase(this)">
+                            <option value="">— Seleccione un paquete —</option>
+                            @foreach (var p in Model.Paquetes)
+                            {
+                                <option value="@p.PaqueteId"
+                                        data-precio="@p.PrecioBase"
+                                        data-max="@p.MaxPersonas">
+                                    @p.Nombre — ₡@p.PrecioBase.ToString("N2") (máx. @p.MaxPersonas personas)
+                                </option>
+                            }
+                        </select>
+                        <span asp-validation-for="PaqueteId" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-medium">Monto total (₡)</label>
+                        <input asp-for="MontoTotal" type="number" step="0.01"
+                               class="form-control" id="inputMonto" placeholder="0.00" />
+                        <span asp-validation-for="MontoTotal" class="text-danger small"></span>
+                        <div class="form-text">Se precalcula con el paquete + servicios. Puede ajustarlo.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-medium">
+                            Notas <span class="text-muted fw-normal">(opcional)</span>
+                        </label>
+                        <textarea asp-for="Notas" class="form-control" rows="3"
+                                  placeholder="Instrucciones especiales, preferencias, etc."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Servicios adicionales -->
+            <div class="card">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-semibold mb-0" style="color:#534AB7;">
+                            <i class="ti ti-tool me-1"></i> Servicios adicionales
+                        </h6>
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="agregarServicio()">
+                            <i class="ti ti-plus me-1"></i> Agregar
+                        </button>
+                    </div>
+
+                    <div id="listaServicios"></div>
+
+                    <div id="sinServicios" class="text-center text-muted py-3">
+                        <i class="ti ti-tool" style="font-size:1.5rem;opacity:0.4;"></i>
+                        <p class="small mb-0 mt-1">Sin servicios adicionales</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna derecha: resumen -->
+        <div class="col-12 col-lg-5">
+            <div class="card" style="background:#f8f7ff;border:1.5px solid #ece9ff;position:sticky;top:1rem;">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center"
+                             style="width:40px;height:40px;background:#534AB7;">
+                            <i class="ti ti-receipt text-white"></i>
+                        </div>
+                        <div>
+                            <div class="fw-semibold" style="color:#534AB7;">Resumen</div>
+                            <small class="text-muted">Totales calculados</small>
+                        </div>
+                    </div>
+                    <hr style="border-color:#ece9ff;">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted small">Paquete base</span>
+                        <span class="fw-medium small" id="resumPaquete">₡0.00</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted small">Servicios adicionales</span>
+                        <span class="fw-medium small" id="resumServicios">₡0.00</span>
+                    </div>
+                    <hr style="border-color:#ece9ff;">
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="fw-semibold">Total estimado</span>
+                        <span class="fw-bold" style="color:#534AB7;" id="resumTotal">₡0.00</span>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary px-4 flex-grow-1">
+                            <i class="ti ti-device-floppy me-1"></i> Guardar reserva
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</form>
+
+<!-- Template fila servicio -->
+<template id="tmplServicio">
+    <div class="d-flex gap-2 align-items-start mb-2 fila-servicio">
+        <select class="form-select form-select-sm srv-select" onchange="onServicioChange(this)">
+            <option value="">— Servicio —</option>
+            @foreach (var s in Model.ServiciosDisponibles)
+            {
+                <option value="@s.ServicioId"
+                        data-precio="@s.PrecioUnitario">
+                    [@s.Categoria] @s.Nombre — ₡@s.PrecioUnitario.ToString("N2")
+                </option>
+            }
+        </select>
+        <input type="number" class="form-control form-control-sm srv-cantidad"
+               value="1" min="1" max="999" style="width:80px;" onchange="recalcular()">
+        <input type="number" class="form-control form-control-sm srv-precio"
+               step="0.01" placeholder="Precio" style="width:120px;" onchange="recalcular()">
+        <button type="button" class="btn btn-sm btn-outline-danger flex-shrink-0"
+                onclick="eliminarServicio(this)">
+            <i class="ti ti-trash"></i>
+        </button>
+    </div>
+</template>
+
+@section Scripts {
+    <script>
+        let precioPaquete = 0;
+
+        function fmt(n) {
+            return '₡' + Number(n).toLocaleString('es-CR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function actualizarPrecioBase(sel) {
+            const opt = sel.options[sel.selectedIndex];
+            precioPaquete = parseFloat(opt?.dataset?.precio ?? 0);
+            document.getElementById('resumPaquete').textContent = fmt(precioPaquete);
+            recalcular();
+        }
+
+        function agregarServicio() {
+            const tmpl  = document.getElementById('tmplServicio');
+            const clone = tmpl.content.cloneNode(true);
+            document.getElementById('listaServicios').appendChild(clone);
+            document.getElementById('sinServicios').classList.add('d-none');
+            recalcular();
+        }
+
+        function eliminarServicio(btn) {
+            btn.closest('.fila-servicio').remove();
+            if (!document.querySelectorAll('.fila-servicio').length)
+                document.getElementById('sinServicios').classList.remove('d-none');
+            recalcular();
+        }
+
+        function onServicioChange(sel) {
+            const opt   = sel.options[sel.selectedIndex];
+            const precio = parseFloat(opt?.dataset?.precio ?? 0);
+            sel.closest('.fila-servicio').querySelector('.srv-precio').value = precio.toFixed(2);
+            recalcular();
+        }
+
+        function recalcular() {
+            let totalServicios = 0;
+            document.querySelectorAll('.fila-servicio').forEach(fila => {
+                const cant   = parseInt(fila.querySelector('.srv-cantidad').value) || 0;
+                const precio = parseFloat(fila.querySelector('.srv-precio').value) || 0;
+                totalServicios += cant * precio;
+            });
+
+            const total = precioPaquete + totalServicios;
+            document.getElementById('resumServicios').textContent = fmt(totalServicios);
+            document.getElementById('resumTotal').textContent     = fmt(total);
+            document.getElementById('inputMonto').value           = total.toFixed(2);
+        }
+
+        document.getElementById('formReserva').addEventListener('submit', function () {
+            document.querySelectorAll('.srv-hidden').forEach(e => e.remove());
+
+            document.querySelectorAll('.fila-servicio').forEach((fila, i) => {
+                const srvId  = fila.querySelector('.srv-select').value;
+                const cant   = fila.querySelector('.srv-cantidad').value;
+                const precio = fila.querySelector('.srv-precio').value;
+                if (!srvId) return;
+
+                const addHidden = (name, val) => {
+                    const inp = document.createElement('input');
+                    inp.type = 'hidden'; inp.name = name; inp.value = val;
+                    inp.className = 'srv-hidden';
+                    this.appendChild(inp);
+                };
+
+                addHidden(`ServiciosSeleccionados[${i}].ServicioId`, srvId);
+                addHidden(`ServiciosSeleccionados[${i}].Cantidad`, cant);
+                addHidden(`ServiciosSeleccionados[${i}].PrecioAcordado`, precio);
+            });
+        });
+    </script>
+}
+}

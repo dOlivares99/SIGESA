@@ -36,6 +36,8 @@ public partial class SIGESAContext : DbContext
 
     public virtual DbSet<Usuario> Usuarios { get; set; }
 
+    public virtual DbSet<TokenRecuperacion> TokenRecuperaciones { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.UseCollation("Latin1_General_CI_AI");
@@ -252,6 +254,19 @@ public partial class SIGESAContext : DbContext
             entity.Property(e => e.Activo).HasDefaultValue(true);
             entity.Property(e => e.Descripcion).HasMaxLength(200);
             entity.Property(e => e.Nombre).HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<TokenRecuperacion>(entity =>
+        {
+            entity.ToTable("TokenRecuperacion");
+            entity.HasKey(e => e.TokenRecuperacionId);
+            entity.Property(e => e.Token).HasMaxLength(128).IsRequired();
+            entity.Property(e => e.Usado).HasDefaultValue(false);
+            entity.HasOne(e => e.Usuario)
+                  .WithMany()
+                  .HasForeignKey(e => e.UsuarioId)
+                  .OnDelete(DeleteBehavior.Cascade)
+                  .HasConstraintName("FK_TokenRecuperacion_Usuario");
         });
 
         modelBuilder.Entity<Usuario>(entity =>

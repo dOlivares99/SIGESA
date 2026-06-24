@@ -1,0 +1,247 @@
+@model List<WEB.Models.ViewModels.ReservaViewModel>
+@{
+    ViewData["Title"] = "Reservas";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h5 class="fw-bold mb-0">Reservas</h5>
+        <small class="text-muted">Listado de reservas registradas</small>
+    </div>
+    <a asp-action="Crear" class="btn btn-primary btn-sm px-3">
+        <i class="ti ti-plus me-1"></i> Nueva reserva
+    </a>
+</div>
+
+@if (TempData["Exito"] != null)
+{
+    <div class="alert alert-success py-2 mb-3">
+        <i class="ti ti-circle-check me-1"></i>@TempData["Exito"]
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger py-2 mb-3">
+        <i class="ti ti-alert-circle me-1"></i>@TempData["Error"]
+    </div>
+}
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger py-2 mb-3">
+        <i class="ti ti-alert-circle me-1"></i>@ViewBag.Error
+    </div>
+}
+
+<div class="card">
+    <div class="card-body">
+
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <div class="d-flex gap-2 flex-wrap">
+                <input type="text" id="searchInput" class="form-control form-control-sm"
+                       placeholder="Buscar por cliente, tipo de evento..."
+                       style="min-width:260px;">
+                <select id="filtroEstado" class="form-select form-select-sm" style="width:auto;">
+                    <option value="">Todos los estados</option>
+                    <option>Pendiente</option>
+                    <option>Confirmada</option>
+                    <option>EnProceso</option>
+                    <option>Realizada</option>
+                    <option>Cancelada</option>
+                </select>
+            </div>
+            <small class="text-muted" id="paginationInfo"></small>
+        </div>
+
+        <table class="table table-hover align-middle mb-0" id="mainTable">
+            <thead style="background:#f8f7ff;">
+                <tr>
+                    <th class="ps-3 py-3" style="color:#534AB7;">#</th>
+                    <th class="py-3" style="color:#534AB7;">Cliente</th>
+                    <th class="py-3" style="color:#534AB7;">Tipo de evento</th>
+                    <th class="py-3" style="color:#534AB7;">Fecha</th>
+                    <th class="py-3" style="color:#534AB7;">Personas</th>
+                    <th class="py-3" style="color:#534AB7;">Estado</th>
+                    <th class="py-3" style="color:#534AB7;">Monto</th>
+                    <th class="py-3" style="color:#534AB7;">Pago</th>
+                    <th class="py-3" style="color:#534AB7;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                @foreach (var r in Model)
+                {
+                    var badgeEstado = r.Estado switch
+                    {
+                        "Confirmada" => "bg-primary",
+                        "EnProceso" => "bg-warning text-dark",
+                        "Realizada" => "badge-activo",
+                        "Cancelada" => "badge-cancelado",
+                        _ => "bg-secondary"
+                    };
+                    var badgePago = r.EstadoPago switch
+                    {
+                        "Saldado" => "badge-activo",
+                        "Parcial" => "badge-pendiente",
+                        _ => "bg-secondary"
+                    };
+
+                    <tr data-cliente="@r.ClienteNombre.ToLower()"
+                        data-tipo="@r.TipoEvento.ToLower()"
+                        data-estado="@r.Estado">
+                        <td class="ps-3 text-muted small">@r.EventoId</td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold"
+                                     style="width:32px;height:32px;background:#f0eeff;color:#534AB7;font-size:0.8rem;flex-shrink:0;">
+                                    @(r.ClienteNombre.Length > 0 ? r.ClienteNombre[0].ToString().ToUpper() : "?")
+                                </div>
+                                <span class="fw-medium">@r.ClienteNombre</span>
+                            </div>
+                        </td>
+                        <td class="text-muted small">@r.TipoEvento</td>
+                        <td class="text-muted small">@r.FechaEvento.ToString("dd/MM/yyyy")</td>
+                        <td class="text-muted small">@r.NumPersonas</td>
+                        <td><span class="badge @badgeEstado">@r.Estado</span></td>
+                        <td class="text-muted small">₡@r.MontoTotal.ToString("N2")</td>
+                        <td><span class="badge @badgePago">@r.EstadoPago</span></td>
+                        <td>
+                            <a asp-action="Editar" asp-route-id="@r.EventoId"
+                               class="btn btn-sm btn-outline-secondary" title="Editar">
+                                <i class="ti ti-edit"></i>
+                            </a>
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-danger"
+                                    title="Eliminar"
+                                    onclick="confirmarEliminar(@r.EventoId, '@r.ClienteNombre — @r.TipoEvento')">
+                                <i class="ti ti-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div id="emptyMsg" class="text-center text-muted py-5 d-none">
+            <i class="ti ti-calendar-off" style="font-size:2rem;"></i>
+            <p class="mt-2 mb-0">No se encontraron reservas</p>
+        </div>
+
+        <div class="d-flex justify-content-center mt-3" id="pagination"></div>
+
+    </div>
+</div>
+
+<!-- Modal eliminar -->
+<div class="modal fade" id="modalEliminar" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:16px;border:none;">
+            <div class="modal-header border-0 pb-0">
+                <h6 class="modal-title fw-bold">Eliminar reserva</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted mb-0">
+                    ¿Deseas eliminar la reserva de <strong id="nombreEliminar"></strong>?
+                    Esta acción no se puede deshacer.
+                </p>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                <form id="formEliminar" method="post" style="display:inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger btn-sm">
+                        <i class="ti ti-trash me-1"></i> Eliminar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const PAGE_SIZE = 10;
+        let currentPage = 1;
+        let filteredRows = [];
+
+        const searchInput    = document.getElementById('searchInput');
+        const filtroEstado   = document.getElementById('filtroEstado');
+        const tableBody      = document.getElementById('tableBody');
+        const allRows        = Array.from(tableBody.querySelectorAll('tr'));
+        const pagination     = document.getElementById('pagination');
+        const paginationInfo = document.getElementById('paginationInfo');
+        const emptyMsg       = document.getElementById('emptyMsg');
+
+        function normalize(str) {
+            return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        }
+
+        function filter() {
+            const q      = normalize(searchInput.value.trim());
+            const estado = filtroEstado.value;
+
+            filteredRows = allRows.filter(r => {
+                const matchQ = !q ||
+                    normalize(r.dataset.cliente).includes(q) ||
+                    normalize(r.dataset.tipo).includes(q);
+                const matchE = !estado || r.dataset.estado === estado;
+                return matchQ && matchE;
+            });
+
+            currentPage = 1;
+            render();
+        }
+
+        function render() {
+            const total      = filteredRows.length;
+            const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+            currentPage      = Math.min(currentPage, totalPages);
+            const start      = (currentPage - 1) * PAGE_SIZE;
+            const end        = start + PAGE_SIZE;
+
+            allRows.forEach(r => r.classList.add('d-none'));
+            filteredRows.slice(start, end).forEach(r => r.classList.remove('d-none'));
+
+            emptyMsg.classList.toggle('d-none', total > 0);
+
+            paginationInfo.textContent = total > 0
+                ? `Mostrando ${Math.min(start+1,total)}–${Math.min(end,total)} de ${total} reserva${total !== 1 ? 's' : ''}`
+                : '';
+
+            pagination.innerHTML = '';
+            if (totalPages <= 1) return;
+
+            const ul = document.createElement('ul');
+            ul.className = 'pagination pagination-sm mb-0';
+
+            const makeBtn = (label, page, disabled, active) => {
+                const li = document.createElement('li');
+                li.className = `page-item ${disabled ? 'disabled' : ''} ${active ? 'active' : ''}`;
+                const a = document.createElement('a');
+                a.className = 'page-link';
+                a.href = '#';
+                a.innerHTML = label;
+                if (active) { a.style.background = '#534AB7'; a.style.borderColor = '#534AB7'; }
+                if (!disabled && !active)
+                    a.addEventListener('click', e => { e.preventDefault(); currentPage = page; render(); });
+                li.appendChild(a);
+                return li;
+            };
+
+            ul.appendChild(makeBtn('&laquo;', currentPage-1, currentPage===1, false));
+            for (let i = Math.max(1,currentPage-2); i <= Math.min(totalPages,currentPage+2); i++)
+                ul.appendChild(makeBtn(i, i, false, i===currentPage));
+            ul.appendChild(makeBtn('&raquo;', currentPage+1, currentPage===totalPages, false));
+            pagination.appendChild(ul);
+        }
+
+        searchInput.addEventListener('input', filter);
+        filtroEstado.addEventListener('change', filter);
+        filter();
+
+        function confirmarEliminar(id, nombre) {
+            document.getElementById('nombreEliminar').textContent = nombre;
+            document.getElementById('formEliminar').action = '/Reservas/Eliminar/' + id;
+            new bootstrap.Modal(document.getElementById('modalEliminar')).show();
+        }
+    </script>
+}

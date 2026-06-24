@@ -1,0 +1,180 @@
+@model WEB.Models.ViewModels.NuevaContrasenaViewModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nueva contraseña — SIGESA</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@@tabler/icons-webfont@latest/tabler-icons.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+            * {
+                font-family: 'Inter', sans-serif;
+            }
+
+            body {
+                background: linear-gradient(135deg, #534AB7 0%, #3d3490 100%);
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .card {
+                border: none;
+                border-radius: 20px;
+                box-shadow: 0 20px 60px rgba(0,0,0,.25);
+            }
+
+            .btn-primary {
+                background: #534AB7;
+                border-color: #534AB7;
+            }
+
+                .btn-primary:hover {
+                    background: #4239a0;
+                    border-color: #4239a0;
+                }
+
+            .form-control:focus {
+                border-color: #534AB7;
+                box-shadow: 0 0 0 .2rem rgba(83,74,183,.2);
+            }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-sm-10 col-md-8 col-lg-5">
+
+                <div class="text-center mb-4">
+                    <h1 class="text-white fw-bold mb-1">SIGESA</h1>
+                    <p class="text-white-50 small">Sala de Eventos Mónica</p>
+                </div>
+
+                <div class="card p-4 p-sm-5">
+                    <div class="text-center mb-4">
+                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                             style="width:56px;height:56px;background:#f0eeff;">
+                            <i class="ti ti-key" style="font-size:1.75rem;color:#534AB7;"></i>
+                        </div>
+                        <h5 class="fw-bold mb-1">Crea tu nueva contraseña</h5>
+                        <p class="text-muted small mb-0">Debe tener al menos 8 caracteres.</p>
+                    </div>
+
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger py-2 mb-3" style="border-radius:10px;">
+                            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                            {
+                                <div><i class="ti ti-alert-circle me-1"></i>@error.ErrorMessage</div>
+                            }
+                        </div>
+                    }
+
+                    <form asp-action="NuevaContrasena" method="post">
+                        @Html.AntiForgeryToken()
+                        <input asp-for="Token" type="hidden" />
+
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Nueva contraseña</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0">
+                                    <i class="ti ti-lock text-muted"></i>
+                                </span>
+                                <input asp-for="Contrasena" type="password"
+                                       id="inputContrasena"
+                                       class="form-control border-start-0 border-end-0 ps-0"
+                                       placeholder="Mínimo 8 caracteres"
+                                       autocomplete="new-password"
+                                       oninput="medirFortaleza(this.value)" />
+                                <button type="button" class="input-group-text bg-white"
+                                        onclick="togglePwd('inputContrasena', this)">
+                                    <i class="ti ti-eye text-muted"></i>
+                                </button>
+                            </div>
+                            <div class="d-flex gap-1 mt-2">
+                                <div id="bar1" style="height:4px;border-radius:2px;flex:1;background:#e9ecef;transition:all .3s;"></div>
+                                <div id="bar2" style="height:4px;border-radius:2px;flex:1;background:#e9ecef;transition:all .3s;"></div>
+                                <div id="bar3" style="height:4px;border-radius:2px;flex:1;background:#e9ecef;transition:all .3s;"></div>
+                                <div id="bar4" style="height:4px;border-radius:2px;flex:1;background:#e9ecef;transition:all .3s;"></div>
+                            </div>
+                            <small id="strengthLabel" class="text-muted"></small>
+                            <span asp-validation-for="Contrasena" class="text-danger small d-block"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-medium">Confirmar contraseña</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0">
+                                    <i class="ti ti-lock-check text-muted"></i>
+                                </span>
+                                <input asp-for="ConfirmarContrasena" type="password"
+                                       id="inputConfirmar"
+                                       class="form-control border-start-0 border-end-0 ps-0"
+                                       placeholder="Repite la contraseña"
+                                       autocomplete="new-password" />
+                                <button type="button" class="input-group-text bg-white"
+                                        onclick="togglePwd('inputConfirmar', this)">
+                                    <i class="ti ti-eye text-muted"></i>
+                                </button>
+                            </div>
+                            <span asp-validation-for="ConfirmarContrasena" class="text-danger small d-block"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
+                            <i class="ti ti-device-floppy me-1"></i> Guardar nueva contraseña
+                        </button>
+                    </form>
+
+                    <div class="text-center mt-4">
+                        <a asp-controller="Auth" asp-action="Login"
+                           class="text-decoration-none small" style="color:#534AB7;">
+                            <i class="ti ti-arrow-left me-1"></i> Volver al inicio de sesión
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function togglePwd(inputId, btn) {
+        const input = document.getElementById(inputId);
+        const icon  = btn.querySelector('i');
+        if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'ti ti-eye-off text-muted';
+        } else {
+        input.type = 'password';
+        icon.className = 'ti ti-eye text-muted';
+        }
+        }
+
+        function medirFortaleza(val) {
+        let score = 0;
+        if (val.length >= 8)           score++;
+        if (/[A-Z]/.test(val))         score++;
+        if (/[0-9]/.test(val))         score++;
+        if (/[^A-Za-z0-9]/.test(val))  score++;
+
+        const colores = ['#dc3545', '#fd7e14', '#ffc107', '#0F6E56'];
+        const labels  = ['Muy débil', 'Débil', 'Regular', 'Fuerte'];
+
+        for (let i = 1; i <= 4; i++) {
+        document.getElementById('bar' + i).style.background =
+        i <= score ? colores[score - 1] : '#e9ecef';
+        }
+
+        const label = document.getElementById('strengthLabel');
+        label.textContent = val.length ? (labels[score - 1] ?? '') : '';
+        label.style.color = score > 0 ? colores[score - 1] : '#999';
+        }
+    </script>
+</body>
+</html>
