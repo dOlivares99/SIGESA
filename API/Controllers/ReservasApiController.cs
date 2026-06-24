@@ -22,6 +22,32 @@ public class ReservasApiController(IReservaService reservaService) : ControllerB
         if (reserva == null) return NotFound();
         return Ok(reserva);
     }
+    // GET api/reservasapi/calendario
+[HttpGet("calendario")]
+public async Task<IActionResult> GetCalendario()
+{
+    var reservas = await reservaService.ObtenerTodosAsync();
+    var eventos = reservas.Select(r => new
+    {
+        id = r.EventoId,
+        title = r.TipoEvento,
+        start = r.FechaEvento.ToString("yyyy-MM-dd"),
+        color = r.Estado switch
+        {
+            "Confirmada" => "#534AB7",
+            "EnProceso"  => "#854F0B",
+            "Realizada"  => "#0F6E56",
+            "Cancelada"  => "#993C1D",
+            _            => "#6c757d"
+        },
+        extendedProps = new
+        {
+            estado = r.Estado,
+            eventoId = r.EventoId
+        }
+    });
+    return Ok(eventos);
+}
 
     [HttpPost]
     public async Task<IActionResult> Post([FromBody] CrearReservaRequest request)

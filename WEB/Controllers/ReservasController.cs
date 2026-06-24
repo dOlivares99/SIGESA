@@ -188,6 +188,8 @@ public class ReservasController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+  
+
     public async Task<IActionResult> Eliminar(int id)
     {
         try
@@ -201,7 +203,7 @@ public class ReservasController : Controller
         }
         return RedirectToAction(nameof(Index));
     }
-
+public IActionResult Calendario() => View();
     private async Task CargarListas(ReservaFormViewModel model)
     {
         try

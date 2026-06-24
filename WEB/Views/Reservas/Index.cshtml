@@ -36,10 +36,10 @@
     <div class="card-body">
 
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-            <div class="d-flex gap-2 flex-wrap">
+            <div class="d-flex gap-2 flex-wrap align-items-center">
                 <input type="text" id="searchInput" class="form-control form-control-sm"
                        placeholder="Buscar por cliente, tipo de evento..."
-                       style="min-width:260px;">
+                       style="min-width:220px;">
                 <select id="filtroEstado" class="form-select form-select-sm" style="width:auto;">
                     <option value="">Todos los estados</option>
                     <option>Pendiente</option>
@@ -48,6 +48,16 @@
                     <option>Realizada</option>
                     <option>Cancelada</option>
                 </select>
+                <input type="date" id="filtroFechaDesde" class="form-control form-control-sm"
+                       style="width:auto;" title="Desde">
+                <input type="date" id="filtroFechaHasta" class="form-control form-control-sm"
+                       style="width:auto;" title="Hasta">
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="limpiarFiltros()">
+                    <i class="ti ti-x me-1"></i> Limpiar
+                </button>
+                <a asp-action="Calendario" class="btn btn-sm btn-outline-primary">
+                    <i class="ti ti-calendar me-1"></i> Calendario
+                </a>
             </div>
             <small class="text-muted" id="paginationInfo"></small>
         </div>
@@ -72,21 +82,21 @@
                     var badgeEstado = r.Estado switch
                     {
                         "Confirmada" => "bg-primary",
-                        "EnProceso" => "bg-warning text-dark",
-                        "Realizada" => "badge-activo",
-                        "Cancelada" => "badge-cancelado",
-                        _ => "bg-secondary"
+                        "EnProceso"  => "bg-warning text-dark",
+                        "Realizada"  => "badge-activo",
+                        "Cancelada"  => "badge-cancelado",
+                        _            => "bg-secondary"
                     };
                     var badgePago = r.EstadoPago switch
                     {
                         "Saldado" => "badge-activo",
                         "Parcial" => "badge-pendiente",
-                        _ => "bg-secondary"
+                        _         => "bg-secondary"
                     };
-
                     <tr data-cliente="@r.ClienteNombre.ToLower()"
                         data-tipo="@r.TipoEvento.ToLower()"
-                        data-estado="@r.Estado">
+                        data-estado="@r.Estado"
+                        data-fecha="@r.FechaEvento.ToString("yyyy-MM-dd")">
                         <td class="ps-3 text-muted small">@r.EventoId</td>
                         <td>
                             <div class="d-flex align-items-center gap-2">
@@ -125,7 +135,10 @@
             <p class="mt-2 mb-0">No se encontraron reservas</p>
         </div>
 
-        <div class="d-flex justify-content-center mt-3" id="pagination"></div>
+        <div class="d-flex flex-column align-items-center mt-3 gap-1">
+            <div id="pagination"></div>
+            <small class="text-muted" id="paginationInfoBottom"></small>
+        </div>
 
     </div>
 </div>
@@ -158,90 +171,126 @@
 </div>
 
 @section Scripts {
-    <script>
-        const PAGE_SIZE = 10;
-        let currentPage = 1;
-        let filteredRows = [];
+<script>
+    const PAGE_SIZE = 10;
+    let currentPage = 1;
+    let filteredRows = [];
 
-        const searchInput    = document.getElementById('searchInput');
-        const filtroEstado   = document.getElementById('filtroEstado');
-        const tableBody      = document.getElementById('tableBody');
-        const allRows        = Array.from(tableBody.querySelectorAll('tr'));
-        const pagination     = document.getElementById('pagination');
-        const paginationInfo = document.getElementById('paginationInfo');
-        const emptyMsg       = document.getElementById('emptyMsg');
+    const searchInput       = document.getElementById('searchInput');
+    const filtroEstado      = document.getElementById('filtroEstado');
+    const filtroFechaDesde  = document.getElementById('filtroFechaDesde');
+    const filtroFechaHasta  = document.getElementById('filtroFechaHasta');
+    const tableBody         = document.getElementById('tableBody');
+    const allRows           = Array.from(tableBody.querySelectorAll('tr'));
+    const pagination        = document.getElementById('pagination');
+    const paginationInfo    = document.getElementById('paginationInfo');
+    const paginationInfoBot = document.getElementById('paginationInfoBottom');
+    const emptyMsg          = document.getElementById('emptyMsg');
 
-        function normalize(str) {
-            return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-        }
+    function normalize(str) {
+        return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    }
 
-        function filter() {
-            const q      = normalize(searchInput.value.trim());
-            const estado = filtroEstado.value;
-
-            filteredRows = allRows.filter(r => {
-                const matchQ = !q ||
-                    normalize(r.dataset.cliente).includes(q) ||
-                    normalize(r.dataset.tipo).includes(q);
-                const matchE = !estado || r.dataset.estado === estado;
-                return matchQ && matchE;
-            });
-
-            currentPage = 1;
-            render();
-        }
-
-        function render() {
-            const total      = filteredRows.length;
-            const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-            currentPage      = Math.min(currentPage, totalPages);
-            const start      = (currentPage - 1) * PAGE_SIZE;
-            const end        = start + PAGE_SIZE;
-
-            allRows.forEach(r => r.classList.add('d-none'));
-            filteredRows.slice(start, end).forEach(r => r.classList.remove('d-none'));
-
-            emptyMsg.classList.toggle('d-none', total > 0);
-
-            paginationInfo.textContent = total > 0
-                ? `Mostrando ${Math.min(start+1,total)}–${Math.min(end,total)} de ${total} reserva${total !== 1 ? 's' : ''}`
-                : '';
-
-            pagination.innerHTML = '';
-            if (totalPages <= 1) return;
-
-            const ul = document.createElement('ul');
-            ul.className = 'pagination pagination-sm mb-0';
-
-            const makeBtn = (label, page, disabled, active) => {
-                const li = document.createElement('li');
-                li.className = `page-item ${disabled ? 'disabled' : ''} ${active ? 'active' : ''}`;
-                const a = document.createElement('a');
-                a.className = 'page-link';
-                a.href = '#';
-                a.innerHTML = label;
-                if (active) { a.style.background = '#534AB7'; a.style.borderColor = '#534AB7'; }
-                if (!disabled && !active)
-                    a.addEventListener('click', e => { e.preventDefault(); currentPage = page; render(); });
-                li.appendChild(a);
-                return li;
-            };
-
-            ul.appendChild(makeBtn('&laquo;', currentPage-1, currentPage===1, false));
-            for (let i = Math.max(1,currentPage-2); i <= Math.min(totalPages,currentPage+2); i++)
-                ul.appendChild(makeBtn(i, i, false, i===currentPage));
-            ul.appendChild(makeBtn('&raquo;', currentPage+1, currentPage===totalPages, false));
-            pagination.appendChild(ul);
-        }
-
-        searchInput.addEventListener('input', filter);
-        filtroEstado.addEventListener('change', filter);
+    function limpiarFiltros() {
+        searchInput.value      = '';
+        filtroEstado.value     = '';
+        filtroFechaDesde.value = '';
+        filtroFechaHasta.value = '';
         filter();
+    }
 
-        function confirmarEliminar(id, nombre) {
-            document.getElementById('nombreEliminar').textContent = nombre;
-            document.getElementById('formEliminar').action = '/Reservas/Eliminar/' + id;
-            new bootstrap.Modal(document.getElementById('modalEliminar')).show();
-        }
-    </script>
+    function filter() {
+        const q     = normalize(searchInput.value.trim());
+        const estado = filtroEstado.value;
+        const desde  = filtroFechaDesde.value;
+        const hasta  = filtroFechaHasta.value;
+
+        filteredRows = allRows.filter(r => {
+            const matchQ = !q ||
+                normalize(r.dataset.cliente).includes(q) ||
+                normalize(r.dataset.tipo).includes(q);
+            const matchE = !estado || r.dataset.estado === estado;
+            const fecha  = r.dataset.fecha;
+            const matchDesde = !desde || fecha >= desde;
+            const matchHasta = !hasta || fecha <= hasta;
+            return matchQ && matchE && matchDesde && matchHasta;
+        });
+
+        currentPage = 1;
+        render();
+    }
+
+    function render() {
+        const total      = filteredRows.length;
+        const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+        currentPage      = Math.min(currentPage, totalPages);
+        const start      = (currentPage - 1) * PAGE_SIZE;
+        const end        = start + PAGE_SIZE;
+
+        allRows.forEach(r => r.classList.add('d-none'));
+        filteredRows.slice(start, end).forEach(r => r.classList.remove('d-none'));
+
+        emptyMsg.classList.toggle('d-none', total > 0);
+
+        const info = total > 0
+            ? `Mostrando ${Math.min(start+1,total)}–${Math.min(end,total)} de ${total} reserva${total !== 1 ? 's' : ''}`
+            : '';
+        paginationInfo.textContent    = info;
+        paginationInfoBot.textContent = info;
+
+        pagination.innerHTML = '';
+        if (totalPages <= 1) return;
+
+        const ul = document.createElement('ul');
+        ul.className = 'pagination pagination-sm mb-0';
+
+        const makeBtn = (label, page, disabled, active) => {
+            const li = document.createElement('li');
+            li.className = `page-item ${disabled ? 'disabled' : ''} ${active ? 'active' : ''}`;
+            const a = document.createElement('a');
+            a.className = 'page-link';
+            a.href = '#';
+            a.innerHTML = label;
+            if (active) { a.style.background = '#534AB7'; a.style.borderColor = '#534AB7'; }
+            if (!disabled && !active)
+                a.addEventListener('click', e => { e.preventDefault(); currentPage = page; render(); });
+            li.appendChild(a);
+            return li;
+        };
+
+        ul.appendChild(makeBtn('&laquo;', currentPage-1, currentPage===1, false));
+
+        const showPages = [];
+        if (currentPage > 3) showPages.push(1, '...');
+        for (let i = Math.max(1,currentPage-2); i <= Math.min(totalPages,currentPage+2); i++)
+            showPages.push(i);
+        if (currentPage < totalPages - 2) showPages.push('...', totalPages);
+
+        showPages.forEach(p => {
+            if (p === '...') {
+                const li = document.createElement('li');
+                li.className = 'page-item disabled';
+                li.innerHTML = '<a class="page-link">…</a>';
+                ul.appendChild(li);
+            } else {
+                ul.appendChild(makeBtn(p, p, false, p === currentPage));
+            }
+        });
+
+        ul.appendChild(makeBtn('&raquo;', currentPage+1, currentPage===totalPages, false));
+        pagination.appendChild(ul);
+    }
+
+    searchInput.addEventListener('input', filter);
+    filtroEstado.addEventListener('change', filter);
+    filtroFechaDesde.addEventListener('change', filter);
+    filtroFechaHasta.addEventListener('change', filter);
+    filter();
+
+    function confirmarEliminar(id, nombre) {
+        document.getElementById('nombreEliminar').textContent = nombre;
+        document.getElementById('formEliminar').action = '/Reservas/Eliminar/' + id;
+        new bootstrap.Modal(document.getElementById('modalEliminar')).show();
+    }
+</script>
 }
