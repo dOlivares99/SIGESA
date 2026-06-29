@@ -204,6 +204,20 @@ public class ReservasController : Controller
         return RedirectToAction(nameof(Index));
     }
 public IActionResult Calendario() => View();
+
+    [HttpGet]
+    public async Task<IActionResult> CalendarioData()
+    {
+        try
+        {
+            var response = await _restProvider.GetAsync(_apiBase + "/reservasapi/calendario");
+            return Content(response, "application/json");
+        }
+        catch
+        {
+            return Ok("[]");
+        }
+    }
     private async Task CargarListas(ReservaFormViewModel model)
     {
         try
