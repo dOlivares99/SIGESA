@@ -1,12 +1,13 @@
 ﻿using Data.Repositories;
 using Business.Services;
+using API.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class ReservasApiController(IReservaService reservaService) : ControllerBase
+public class ReservasApiController(IReservaService reservaService, IEmailService emailService) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> Get()
@@ -78,6 +79,9 @@ public async Task<IActionResult> GetCalendario()
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
+        var reservaAntes = await reservaService.ObtenerConDetallesAsync(id);
+        var estadoAnterior = reservaAntes?.Estado;
+
         var dto = new ActualizarReservaDto(
             request.ClienteId,
             request.PaqueteId,
@@ -93,9 +97,33 @@ public async Task<IActionResult> GetCalendario()
 
         var result = await reservaService.ActualizarAsync(id, dto);
 
-        return result
-            ? Ok(new { mensaje = "Reserva actualizada correctamente." })
-            : NotFound(new { mensaje = "Reserva no encontrada." });
+        if (!result) return NotFound(new { mensaje = "Reserva no encontrada." });
+
+        if (estadoAnterior != "Confirmada" && request.Estado == "Confirmada")
+        {
+            var reservaActualizada = await reservaService.ObtenerConDetallesAsync(id);
+            var email = reservaActualizada?.Cliente?.Email;
+
+            if (!string.IsNullOrWhiteSpace(email))
+            {
+                try
+                {
+                    await emailService.EnviarConfirmacionReservaAsync(
+                        email,
+                        reservaActualizada!.Cliente.Nombre,
+                        reservaActualizada.TipoEvento,
+                        reservaActualizada.FechaEvento,
+                        reservaActualizada.NumPersonas,
+                        reservaActualizada.MontoTotal);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[Email Error] {ex.Message}");
+                }
+            }
+        }
+
+        return Ok(new { mensaje = "Reserva actualizada correctamente." });
     }
 
     [HttpDelete("{id}")]
