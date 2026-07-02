@@ -105,8 +105,7 @@
                                                value="@(!s.Activo ? "true" : "false")" />
                                         <button type="submit"
                                                 class="btn btn-sm @(s.Activo ? "btn-outline-danger" : "btn-outline-success")"
-                                                title="@(s.Activo ? "Desactivar" : "Activar")"
-                                                onclick="return confirm('@(s.Activo ? "¿Desactivar este servicio?" : "¿Activar este servicio?")')">
+                                                title="@(s.Activo ? "Desactivar" : "Activar")">
                                             <i class="ti @(s.Activo ? "ti-toggle-left" : "ti-toggle-right")"></i>
                                         </button>
                                     </form>

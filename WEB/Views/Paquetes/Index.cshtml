@@ -99,8 +99,7 @@
                                 <input type="hidden" name="activo" value="@(!p.Activo ? "true" : "false")" />
                                 <button type="submit"
                                         class="btn btn-sm @(p.Activo ? "btn-outline-danger" : "btn-outline-success")"
-                                        title="@(p.Activo ? "Desactivar" : "Activar")"
-                                        onclick="return confirm('@(p.Activo ? "¿Desactivar este paquete?" : "¿Activar este paquete?")')">
+                                        title="@(p.Activo ? "Desactivar" : "Activar")">
                                     <i class="ti @(p.Activo ? "ti-toggle-left" : "ti-toggle-right")"></i>
                                 </button>
                             </form>
