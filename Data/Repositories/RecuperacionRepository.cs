@@ -45,7 +45,7 @@ public class RecuperacionRepository : IRecuperacionRepository
             .FirstOrDefaultAsync(t =>
                 t.Token == token &&
                 !t.Usado &&
-                t.Expiracion > DateTime.Now);
+                t.Expiracion > DateTime.UtcNow);
 
     public async Task InvalidarTokenAsync(string token)
     {
@@ -61,7 +61,7 @@ public class RecuperacionRepository : IRecuperacionRepository
     public async Task LimpiarExpiradosAsync()
     {
         var expirados = await _ctx.Set<TokenRecuperacion>()
-            .Where(t => t.Expiracion < DateTime.Now)
+            .Where(t => t.Expiracion < DateTime.UtcNow)
             .ToListAsync();
         _ctx.Set<TokenRecuperacion>().RemoveRange(expirados);
         await _ctx.SaveChangesAsync();

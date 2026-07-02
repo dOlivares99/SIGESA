@@ -32,7 +32,7 @@ public class RecuperacionApiController : ControllerBase
             return Ok(new { mensaje = "Si el correo existe, recibirás un enlace en breve." });
 
         var token = Guid.NewGuid().ToString("N") + Guid.NewGuid().ToString("N");
-        var expiracion = DateTime.Now.AddMinutes(30);
+        var expiracion = DateTime.UtcNow.AddHours(2);
 
         await _recuperacionRepo.GuardarTokenAsync(usuario.UsuarioId, token, expiracion);
 
