@@ -21,6 +21,9 @@ builder.Services.AddScoped<IServicioRepository, ServicioRepository>();
 builder.Services.AddScoped<IServicioService, ServicioService>();
 builder.Services.AddScoped<IReservaRepository, ReservaRepository>();
 builder.Services.AddScoped<IReservaService, ReservaService>();
+builder.Services.AddScoped<IPagoRepository, PagoRepository>();
+builder.Services.AddScoped<IPagoService, PagoService>();
+builder.Services.AddSingleton<API.Services.IBlobStorageService, API.Services.BlobStorageService>();
 builder.Services.AddScoped<IRecuperacionRepository, RecuperacionRepository>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 

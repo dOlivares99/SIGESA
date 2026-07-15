@@ -1,9 +1,6 @@
-@* @model WEB.Models.ViewModels.PagoFormViewModel
+@model WEB.Models.ViewModels.PagoFormViewModel
 @{
     ViewData["Title"] = "Registrar pago";
-    var eventos      = ViewBag.Eventos      as Microsoft.AspNetCore.Mvc.Rendering.SelectList;
-    var tiposPago    = ViewBag.TiposPago    as Microsoft.AspNetCore.Mvc.Rendering.SelectList;
-    var metodosPago  = ViewBag.MetodosPago  as Microsoft.AspNetCore.Mvc.Rendering.SelectList;
 }
 
 <div class="d-flex align-items-center gap-3 mb-4">
@@ -12,90 +9,207 @@
     </a>
     <div>
         <h5 class="fw-bold mb-0">Registrar pago</h5>
-        <small class="text-muted">Registra un pago asociado a un evento</small>
+        <small class="text-muted">Completa los datos del pago</small>
     </div>
 </div>
 
-<div class="card" style="max-width:560px;">
-    <div class="card-body p-4">
-
-        @if (!ViewData.ModelState.IsValid)
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger py-2 mb-3">
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
         {
-            <div class="alert alert-danger py-2">
-                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-                {
-                    <div><i class="ti ti-alert-circle me-1"></i>@error.ErrorMessage</div>
-                }
-            </div>
+            <div><i class="ti ti-alert-circle me-1"></i>@error.ErrorMessage</div>
         }
+    </div>
+}
 
-        <form asp-action="Crear" method="post">
-            @Html.AntiForgeryToken()
+<form asp-action="Crear" method="post" enctype="multipart/form-data" id="formPago">
+    @Html.AntiForgeryToken()
 
-            <div class="mb-3">
-                <label asp-for="EventoId" class="form-label fw-medium">Evento</label>
-                <select asp-for="EventoId" asp-items="eventos" class="form-select">
-                    <option value="">— Selecciona un evento —</option>
-                </select>
-                <span asp-validation-for="EventoId" class="text-danger small"></span>
-            </div>
+    <div class="row g-4">
 
-            <div class="row g-3 mb-3">
-                <div class="col-6">
-                    <label asp-for="TipoPagoId" class="form-label fw-medium">Tipo de pago</label>
-                    <select asp-for="TipoPagoId" asp-items="tiposPago" class="form-select">
-                        <option value="">— Tipo —</option>
-                    </select>
-                    <span asp-validation-for="TipoPagoId" class="text-danger small"></span>
+        <div class="col-12 col-lg-7">
+            <div class="card">
+                <div class="card-body p-4">
+                    <h6 class="fw-semibold mb-3" style="color:#534AB7;">
+                        <i class="ti ti-cash me-1"></i> Datos del pago
+                    </h6>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-medium">Evento</label>
+                        <select asp-for="EventoId" class="form-select" id="selectEvento"
+                                onchange="actualizarSaldo(this)">
+                            <option value="">— Seleccione un evento —</option>
+                            @foreach (var e in Model.Eventos)
+                            {
+                                <option value="@e.EventoId" data-saldo="@e.SaldoPendiente">
+                                    @e.ClienteNombre — @e.TipoEvento (saldo: ₡@e.SaldoPendiente.ToString("N2"))
+                                </option>
+                            }
+                        </select>
+                        <span asp-validation-for="EventoId" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label fw-medium">Tipo de pago</label>
+                            <select asp-for="TipoPagoId" class="form-select">
+                                <option value="">— Seleccione —</option>
+                                @foreach (var t in Model.TiposPago)
+                                {
+                                    <option value="@t.Id">@t.Nombre</option>
+                                }
+                            </select>
+                            <span asp-validation-for="TipoPagoId" class="text-danger small"></span>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label fw-medium">Método de pago</label>
+                            <select asp-for="MetodoPagoId" class="form-select">
+                                <option value="">— Seleccione —</option>
+                                @foreach (var m in Model.MetodosPago)
+                                {
+                                    <option value="@m.Id">@m.Nombre</option>
+                                }
+                            </select>
+                            <span asp-validation-for="MetodoPagoId" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label fw-medium">Monto (₡)</label>
+                            <input asp-for="Monto" type="number" step="0.01" min="0.01"
+                                   class="form-control" id="inputMonto" placeholder="0.00" />
+                            <span asp-validation-for="Monto" class="text-danger small"></span>
+                            <div class="form-text" id="hintSaldo"></div>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label fw-medium">Fecha del pago</label>
+                            <input asp-for="FechaPago" type="date" class="form-control"
+                                   value="@Model.FechaPago.ToString("yyyy-MM-dd")" />
+                            <span asp-validation-for="FechaPago" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-medium">
+                            Observación <span class="text-muted fw-normal">(opcional)</span>
+                        </label>
+                        <textarea asp-for="Observacion" class="form-control" rows="2"
+                                  placeholder="Referencia, número de transacción, etc."></textarea>
+                        <span asp-validation-for="Observacion" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-medium">
+                            Comprobante <span class="text-muted fw-normal">(opcional, JPG o PNG)</span>
+                        </label>
+                        <input asp-for="Comprobante" type="file" class="form-control"
+                               accept=".jpg,.jpeg,.png" id="inputComprobante" />
+                        <div class="form-text">Solo se permiten imágenes JPG o PNG.</div>
+                        <div id="previewContainer" class="mt-2 d-none">
+                            <img id="previewImg" src="" alt="Vista previa"
+                                 style="max-width:200px;max-height:200px;border-radius:8px;border:1.5px solid #ece9ff;" />
+                        </div>
+                    </div>
                 </div>
-                <div class="col-6">
-                    <label asp-for="MetodoPagoId" class="form-label fw-medium">Método de pago</label>
-                    <select asp-for="MetodoPagoId" asp-items="metodosPago" class="form-select">
-                        <option value="">— Método —</option>
-                    </select>
-                    <span asp-validation-for="MetodoPagoId" class="text-danger small"></span>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-5">
+            <div class="card" style="background:#f8f7ff;border:1.5px solid #ece9ff;position:sticky;top:1rem;">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center"
+                             style="width:40px;height:40px;background:#534AB7;">
+                            <i class="ti ti-receipt-2 text-white"></i>
+                        </div>
+                        <div>
+                            <div class="fw-semibold" style="color:#534AB7;">Resumen</div>
+                            <small class="text-muted">Estado del saldo</small>
+                        </div>
+                    </div>
+                    <hr style="border-color:#ece9ff;">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted small">Saldo pendiente</span>
+                        <span class="fw-medium small" id="resumSaldo">₡0.00</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted small">Monto a pagar</span>
+                        <span class="fw-medium small" id="resumMonto">₡0.00</span>
+                    </div>
+                    <hr style="border-color:#ece9ff;">
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="fw-semibold">Saldo restante</span>
+                        <span class="fw-bold" style="color:#534AB7;" id="resumRestante">₡0.00</span>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary px-4 flex-grow-1">
+                            <i class="ti ti-device-floppy me-1"></i> Registrar pago
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+                    </div>
                 </div>
             </div>
-
-            <div class="row g-3 mb-3">
-                <div class="col-7">
-                    <label asp-for="Monto" class="form-label fw-medium">Monto (₡)</label>
-                    <input asp-for="Monto" type="number" step="0.01" min="0.01"
-                           class="form-control" placeholder="0.00" />
-                    <span asp-validation-for="Monto" class="text-danger small"></span>
-                </div>
-                <div class="col-5">
-                    <label asp-for="FechaPago" class="form-label fw-medium">Fecha</label>
-                    <input asp-for="FechaPago" type="date" class="form-control" />
-                    <span asp-validation-for="FechaPago" class="text-danger small"></span>
-                </div>
-            </div>
-
-            <div class="mb-3">
-                <label asp-for="UrlComprobante" class="form-label fw-medium">
-                    URL del comprobante <span class="text-muted fw-normal">(opcional)</span>
-                </label>
-                <input asp-for="UrlComprobante" class="form-control"
-                       placeholder="https://..." />
-                <span asp-validation-for="UrlComprobante" class="text-danger small"></span>
-            </div>
-
-            <div class="mb-4">
-                <label asp-for="Observacion" class="form-label fw-medium">
-                    Observación <span class="text-muted fw-normal">(opcional)</span>
-                </label>
-                <textarea asp-for="Observacion" class="form-control" rows="2"
-                          placeholder="Notas adicionales sobre el pago..."></textarea>
-                <span asp-validation-for="Observacion" class="text-danger small"></span>
-            </div>
-
-            <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-primary px-4">
-                    <i class="ti ti-device-floppy me-1"></i> Guardar
-                </button>
-                <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
-            </div>
-        </form>
+        </div>
 
     </div>
-</div> *@
+</form>
+
+@section Scripts {
+<script>
+    let saldoPendiente = 0;
+
+    function fmt(n) {
+        return '₡' + Number(n).toLocaleString('es-CR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function actualizarSaldo(sel) {
+        const opt = sel.options[sel.selectedIndex];
+        saldoPendiente = parseFloat(opt?.dataset?.saldo ?? 0);
+        document.getElementById('resumSaldo').textContent = fmt(saldoPendiente);
+        document.getElementById('hintSaldo').textContent =
+            saldoPendiente > 0 ? `Saldo pendiente: ${fmt(saldoPendiente)}` : '';
+        document.getElementById('inputMonto').max = saldoPendiente;
+        recalcular();
+    }
+
+    function recalcular() {
+        const monto = parseFloat(document.getElementById('inputMonto').value) || 0;
+        document.getElementById('resumMonto').textContent    = fmt(monto);
+        document.getElementById('resumRestante').textContent = fmt(Math.max(0, saldoPendiente - monto));
+    }
+
+    document.getElementById('inputMonto').addEventListener('input', recalcular);
+
+    // Validación de formato + vista previa del comprobante
+    document.getElementById('inputComprobante').addEventListener('change', function () {
+        const file = this.files[0];
+        const preview = document.getElementById('previewContainer');
+        const img = document.getElementById('previewImg');
+
+        if (!file) {
+            preview.classList.add('d-none');
+            return;
+        }
+
+        const permitidos = ['image/jpeg', 'image/png'];
+        if (!permitidos.includes(file.type)) {
+            alert('Solo se permiten imágenes JPG o PNG.');
+            this.value = '';
+            preview.classList.add('d-none');
+            return;
+        }
+
+        img.src = URL.createObjectURL(file);
+        preview.classList.remove('d-none');
+    });
+
+    // Inicializar si viene con evento preseleccionado
+    window.addEventListener('DOMContentLoaded', () => {
+        const sel = document.getElementById('selectEvento');
+        if (sel && sel.value) actualizarSaldo(sel);
+    });
+</script>
+}
