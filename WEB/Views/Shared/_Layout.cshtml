@@ -292,6 +292,11 @@
                 <i class="ti ti-cash"></i> Pagos
             </a>
 
+            <a asp-controller="Saldos" asp-action="Index"
+               class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Saldos" ? "active" : "")">
+                <i class="ti ti-report-money"></i> Saldos
+            </a>
+
             <div class="nav-section admin-only">Configuración</div>
             <a asp-controller="Usuarios" asp-action="Index"
                class="nav-link admin-only @(ViewContext.RouteData.Values["controller"]?.ToString() == "Usuarios" ? "active" : "")">

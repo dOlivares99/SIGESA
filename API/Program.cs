@@ -26,6 +26,8 @@ builder.Services.AddScoped<IPagoService, PagoService>();
 builder.Services.AddSingleton<API.Services.IBlobStorageService, API.Services.BlobStorageService>();
 builder.Services.AddScoped<IRecuperacionRepository, RecuperacionRepository>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<ICotizacionRepository, CotizacionRepository>();
+builder.Services.AddScoped<ICotizacionService, CotizacionService>();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>

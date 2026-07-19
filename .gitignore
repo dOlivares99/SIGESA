@@ -20,3 +20,4 @@ Thumbs.db
 # Publicacion
 publish/
 out/
+/API/appsettings.json

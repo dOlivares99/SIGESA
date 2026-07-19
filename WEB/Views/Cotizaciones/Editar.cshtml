@@ -1,4 +1,4 @@
-@* @model WEB.Models.ViewModels.CotizacionFormViewModel
+@model WEB.Models.ViewModels.CotizacionFormViewModel
 @{
     ViewData["Title"] = "Editar cotización";
 }
@@ -13,80 +13,146 @@
     </div>
 </div>
 
-<div class="card" style="max-width:560px;">
-    <div class="card-body p-4">
+<div class="row g-4">
 
-        @if (!ViewData.ModelState.IsValid)
-        {
-            <div class="alert alert-danger py-2">
-                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+    <div class="col-12 col-lg-7">
+        <div class="card h-100">
+            <div class="card-body p-4">
+
+                @if (!ViewData.ModelState.IsValid)
                 {
-                    <div><i class="ti ti-alert-circle me-1"></i>@error.ErrorMessage</div>
+                    <div class="alert alert-danger py-2">
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <div><i class="ti ti-alert-circle me-1"></i>@error.ErrorMessage</div>
+                        }
+                    </div>
                 }
+
+                <form asp-action="Editar" asp-route-id="@Model.CotizacionId" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label class="form-label fw-medium text-muted">Evento</label>
+                        <input type="text" class="form-control"
+                               value="#@Model.EventoId" disabled />
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Total" class="form-label fw-medium">Total (₡)</label>
+                        <input asp-for="Total" type="number" step="0.01" min="0"
+                               class="form-control" />
+                        <span asp-validation-for="Total" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Estado" class="form-label fw-medium">Estado</label>
+                        <select asp-for="Estado" class="form-select" id="estadoSelect">
+                            <option value="Borrador">Borrador</option>
+                            <option value="Enviada">Enviada</option>
+                            <option value="Aceptada">Aceptada</option>
+                            <option value="Rechazada">Rechazada</option>
+                        </select>
+                        <span asp-validation-for="Estado" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3" id="motivoGroup" style="display:none;">
+                        <label asp-for="MotivoRechazo" class="form-label fw-medium">
+                            Motivo de rechazo
+                        </label>
+                        <textarea asp-for="MotivoRechazo" class="form-control" rows="3"
+                                  placeholder="Describe el motivo del rechazo..."></textarea>
+                        <span asp-validation-for="MotivoRechazo" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="FechaVencimiento" class="form-label fw-medium">
+                            Fecha de vencimiento
+                            <span class="text-muted fw-normal">(opcional)</span>
+                        </label>
+                        <input asp-for="FechaVencimiento" type="date" class="form-control" />
+                        <span asp-validation-for="FechaVencimiento" class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="ti ti-device-floppy me-1"></i> Guardar cambios
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+                    </div>
+                </form>
+
             </div>
-        }
-
-        <form asp-action="Editar" asp-route-id="@Model.CotizacionId" method="post">
-            @Html.AntiForgeryToken()
-
-            <div class="mb-3">
-                <label class="form-label fw-medium text-muted">Evento</label>
-                <input type="text" class="form-control" value="#@Model.EventoId" disabled />
-            </div>
-
-            <div class="mb-3">
-                <label asp-for="Total" class="form-label fw-medium">Total (₡)</label>
-                <input asp-for="Total" type="number" step="0.01" min="0" class="form-control" />
-                <span asp-validation-for="Total" class="text-danger small"></span>
-            </div>
-
-            <div class="mb-3">
-                <label asp-for="Estado" class="form-label fw-medium">Estado</label>
-                <select asp-for="Estado" class="form-select" id="estadoSelect">
-                    <option value="Pendiente">Pendiente</option>
-                    <option value="Aprobada">Aprobada</option>
-                    <option value="Rechazada">Rechazada</option>
-                    <option value="Vencida">Vencida</option>
-                </select>
-                <span asp-validation-for="Estado" class="text-danger small"></span>
-            </div>
-
-            <div class="mb-3" id="motivoGroup" style="display:none;">
-                <label asp-for="MotivoRechazo" class="form-label fw-medium">Motivo de rechazo</label>
-                <textarea asp-for="MotivoRechazo" class="form-control" rows="3"
-                          placeholder="Describe el motivo del rechazo..."></textarea>
-                <span asp-validation-for="MotivoRechazo" class="text-danger small"></span>
-            </div>
-
-            <div class="mb-4">
-                <label asp-for="FechaVencimiento" class="form-label fw-medium">
-                    Fecha de vencimiento <span class="text-muted fw-normal">(opcional)</span>
-                </label>
-                <input asp-for="FechaVencimiento" type="date" class="form-control" />
-                <span asp-validation-for="FechaVencimiento" class="text-danger small"></span>
-            </div>
-
-            <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-primary px-4">
-                    <i class="ti ti-device-floppy me-1"></i> Guardar cambios
-                </button>
-                <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
-            </div>
-        </form>
-
+        </div>
     </div>
+
+    <div class="col-12 col-lg-5">
+        <div class="card h-100" style="background:#f8f7ff;border:1.5px solid #ece9ff;">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center"
+                         style="width:40px;height:40px;background:#534AB7;">
+                        <i class="ti ti-file-invoice text-white"></i>
+                    </div>
+                    <div>
+                        <div class="fw-semibold" style="color:#534AB7;">Datos actuales</div>
+                        <small class="text-muted">Cotización #@Model.CotizacionId</small>
+                    </div>
+                </div>
+                <hr style="border-color:#ece9ff;">
+                <div class="mb-3">
+                    <small class="text-muted d-block mb-1">Total actual</small>
+                    <span class="fw-bold fs-5" style="color:#534AB7;">
+                        ₡@Model.Total.ToString("N2")
+                    </span>
+                </div>
+                <div class="mb-3">
+                    <small class="text-muted d-block mb-1">Estado actual</small>
+                    @{
+                        var (bg, fg) = Model.Estado switch
+                        {
+                            "Aceptada" => ("#e6f4f0", "#0F6E56"),
+                            "Enviada" => ("#e8f0fe", "#1a56db"),
+                            "Rechazada" => ("#fdf0ed", "#993C1D"),
+                            _ => ("#f0eeff", "#534AB7")
+                        };
+                    }
+                    <span class="badge rounded-pill px-3"
+                          style="background:@bg;color:@fg;">@Model.Estado</span>
+                </div>
+                @if (Model.FechaVencimiento.HasValue)
+                {
+                    <div class="mb-3">
+                        <small class="text-muted d-block mb-1">Vencimiento actual</small>
+                        <span class="fw-medium">
+                            @Model.FechaVencimiento.Value.ToString("dd/MM/yyyy")
+                        </span>
+                    </div>
+                }
+                <hr style="border-color:#ece9ff;">
+                <div class="d-flex align-items-start gap-2 mt-3">
+                    <i class="ti ti-info-circle mt-1" style="color:#534AB7;"></i>
+                    <small class="text-muted">
+                        Si cambias el estado a <strong>Rechazada</strong>, debes indicar
+                        el motivo. Este quedará registrado en el historial de la cotización.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 @section Scripts {
-<script>
-    const estadoSelect  = document.getElementById('estadoSelect');
-    const motivoGroup   = document.getElementById('motivoGroup');
+    <script>
+        const estadoSelect = document.getElementById('estadoSelect');
+        const motivoGroup  = document.getElementById('motivoGroup');
 
-    function toggleMotivo() {
-        motivoGroup.style.display = estadoSelect.value === 'Rechazada' ? '' : 'none';
-    }
+        function toggleMotivo() {
+            motivoGroup.style.display = estadoSelect.value === 'Rechazada' ? '' : 'none';
+        }
 
-    estadoSelect.addEventListener('change', toggleMotivo);
-    toggleMotivo();
-</script>
-} *@
+        estadoSelect.addEventListener('change', toggleMotivo);
+        toggleMotivo();
+    </script>
+}

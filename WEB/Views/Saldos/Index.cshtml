@@ -1,0 +1,226 @@
+﻿@model List<WEB.Models.ViewModels.SaldoViewModel>
+@{
+    ViewData["Title"] = "Control de saldos";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h5 class="fw-bold mb-0">Control de saldos</h5>
+        <small class="text-muted">Seguimiento de pagos y saldos pendientes por reserva</small>
+    </div>
+</div>
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger"><i class="ti ti-alert-circle me-1"></i>@ViewBag.Error</div>
+}
+
+<!-- Tarjetas resumen -->
+<div class="row g-3 mb-4">
+    <div class="col-12 col-md-4">
+        <div class="card h-100">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center"
+                         style="width:44px;height:44px;background:#f0eeff;">
+                        <i class="ti ti-cash" style="color:#534AB7;font-size:1.25rem;"></i>
+                    </div>
+                    <div>
+                        <small class="text-muted d-block">Total facturado</small>
+                        <span class="fw-bold fs-5">₡@((ViewBag.TotalMonto as decimal? ?? 0).ToString("N2"))</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-4">
+        <div class="card h-100">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center"
+                         style="width:44px;height:44px;background:#e6f4f0;">
+                        <i class="ti ti-circle-check" style="color:#0F6E56;font-size:1.25rem;"></i>
+                    </div>
+                    <div>
+                        <small class="text-muted d-block">Total cobrado</small>
+                        <span class="fw-bold fs-5" style="color:#0F6E56;">
+                            ₡@((ViewBag.TotalPagado as decimal? ?? 0).ToString("N2"))
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-4">
+        <div class="card h-100">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center"
+                         style="width:44px;height:44px;background:#fdf0ed;">
+                        <i class="ti ti-alert-circle" style="color:#993C1D;font-size:1.25rem;"></i>
+                    </div>
+                    <div>
+                        <small class="text-muted d-block">Saldo pendiente</small>
+                        <span class="fw-bold fs-5" style="color:#993C1D;">
+                            ₡@((ViewBag.TotalSaldo as decimal? ?? 0).ToString("N2"))
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabla -->
+<div class="card">
+    <div class="card-body">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <input type="text" id="searchInput" class="form-control form-control-sm"
+                   placeholder="Buscar por cliente, tipo de evento o estado..."
+                   style="max-width:320px;">
+            <small class="text-muted" id="paginationInfo"></small>
+        </div>
+
+        <table class="table table-hover align-middle mb-0" id="mainTable">
+            <thead style="background:#f8f7ff;">
+                <tr>
+                    <th class="ps-3 py-3" style="color:#534AB7;">#</th>
+                    <th class="py-3" style="color:#534AB7;">Cliente</th>
+                    <th class="py-3" style="color:#534AB7;">Evento</th>
+                    <th class="py-3" style="color:#534AB7;">Fecha</th>
+                    <th class="py-3" style="color:#534AB7;">Estado reserva</th>
+                    <th class="py-3" style="color:#534AB7;">Monto total</th>
+                    <th class="py-3" style="color:#534AB7;">Pagado</th>
+                    <th class="py-3" style="color:#534AB7;">Saldo pendiente</th>
+                    <th class="py-3" style="color:#534AB7;">Estado pago</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                @foreach (var s in Model)
+                {
+                    <tr>
+                        <td class="ps-3 text-muted small">@s.EventoId</td>
+                        <td class="fw-medium">@s.ClienteNombre</td>
+                        <td>
+                            <div>@s.TipoEvento</div>
+                            <small class="text-muted">@s.PaqueteNombre</small>
+                        </td>
+                        <td class="text-muted small">@s.FechaEvento.ToString("dd/MM/yyyy")</td>
+                        <td>
+                            @{
+                                var (ebg, efg) = s.Estado switch
+                                {
+                                    "Confirmada" => ("#e6f4f0", "#0F6E56"),
+                                    "Realizada" => ("#e8f0fe", "#1a56db"),
+                                    "Cancelada" => ("#fdf0ed", "#993C1D"),
+                                    "EnProceso" => ("#fdf5e6", "#854F0B"),
+                                    _ => ("#f0eeff", "#534AB7")
+                                };
+                            }
+                            <span class="badge rounded-pill"
+                                  style="background:@ebg;color:@efg;">@s.Estado</span>
+                        </td>
+                        <td class="fw-medium">₡@s.MontoTotal.ToString("N2")</td>
+                        <td class="text-success fw-medium">₡@s.MontoPagado.ToString("N2")</td>
+                        <td>
+                            <span class="fw-bold @(s.SaldoPendiente > 0 ? "text-danger" : "text-success")">
+                                ₡@s.SaldoPendiente.ToString("N2")
+                            </span>
+                        </td>
+                        <td>
+                            @{
+                                var (pbg, pfg) = s.EstadoPago switch
+                                {
+                                    "Saldado" => ("#e6f4f0", "#0F6E56"),
+                                    "Parcial" => ("#fdf5e6", "#854F0B"),
+                                    _ => ("#f0eeff", "#534AB7")
+                                };
+                            }
+                            <span class="badge rounded-pill"
+                                  style="background:@pbg;color:@pfg;">@s.EstadoPago</span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div id="emptyMsg" class="text-center text-muted py-5 d-none">
+            <i class="ti ti-search-off" style="font-size:2rem;"></i>
+            <p class="mt-2 mb-0">No se encontraron resultados</p>
+        </div>
+
+        <div class="d-flex justify-content-center mt-3" id="pagination"></div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const PAGE_SIZE = 10;
+        let currentPage = 1;
+        let filteredRows = [];
+
+        const searchInput    = document.getElementById('searchInput');
+        const tableBody      = document.getElementById('tableBody');
+        const allRows        = Array.from(tableBody.querySelectorAll('tr'));
+        const pagination     = document.getElementById('pagination');
+        const paginationInfo = document.getElementById('paginationInfo');
+        const emptyMsg       = document.getElementById('emptyMsg');
+
+        function normalize(str) {
+            return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        }
+
+        function filter() {
+            const q = normalize(searchInput.value.trim());
+            filteredRows = q
+                ? allRows.filter(r => normalize(r.innerText).includes(q))
+                : [...allRows];
+            currentPage = 1;
+            render();
+        }
+
+        function render() {
+            const total = filteredRows.length;
+            const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+            currentPage = Math.min(currentPage, totalPages);
+            const start = (currentPage - 1) * PAGE_SIZE;
+            const end   = start + PAGE_SIZE;
+
+            allRows.forEach(r => r.classList.add('d-none'));
+            filteredRows.slice(start, end).forEach(r => r.classList.remove('d-none'));
+
+            emptyMsg.classList.toggle('d-none', total > 0);
+            paginationInfo.textContent = total > 0
+                ? `Mostrando ${Math.min(start + 1, total)}–${Math.min(end, total)} de ${total}`
+                : '';
+
+            pagination.innerHTML = '';
+            if (totalPages <= 1) return;
+
+            const ul = document.createElement('ul');
+            ul.className = 'pagination pagination-sm mb-0';
+
+            const makeBtn = (label, page, disabled, active) => {
+                const li = document.createElement('li');
+                li.className = `page-item ${disabled ? 'disabled' : ''} ${active ? 'active' : ''}`;
+                li.innerHTML = `<a class="page-link" href="#" style="${active ? 'background:#534AB7;border-color:#534AB7;' : ''}">${label}</a>`;
+                if (!disabled && !active) {
+                    li.querySelector('a').addEventListener('click', e => {
+                        e.preventDefault(); currentPage = page; render();
+                    });
+                }
+                return li;
+            };
+
+            ul.appendChild(makeBtn('&laquo;', currentPage - 1, currentPage === 1, false));
+            for (let i = 1; i <= totalPages; i++)
+                ul.appendChild(makeBtn(i, i, false, i === currentPage));
+            ul.appendChild(makeBtn('&raquo;', currentPage + 1, currentPage === totalPages, false));
+            pagination.appendChild(ul);
+        }
+
+        searchInput.addEventListener('input', filter);
+        filter();
+    </script>
+}
