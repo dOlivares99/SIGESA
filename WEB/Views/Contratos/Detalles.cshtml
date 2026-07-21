@@ -1,0 +1,294 @@
+@model WEB.Models.ViewModels.ContratoViewModel
+
+@{
+    ViewData["Title"] = "Detalles del contrato";
+}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="mb-1">
+                Detalles del contrato
+            </h2>
+
+            <p class="text-muted mb-0">
+                @Model.NumeroContrato
+            </p>
+        </div>
+
+        <div class="d-flex gap-2">
+
+            <a asp-action="DescargarPdf"
+               asp-route-id="@Model.ContratoId"
+               class="btn btn-outline-danger"
+               target="_blank">
+
+                <i class="bi bi-file-earmark-pdf"></i>
+                Descargar PDF
+
+            </a>
+
+            <a asp-action="Editar"
+               asp-route-id="@Model.ContratoId"
+               class="btn btn-primary">
+
+                <i class="bi bi-pencil-square"></i>
+                Editar
+
+            </a>
+
+        </div>
+
+    </div>
+
+    @if (TempData["Exito"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Exito"]
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["Error"]
+        </div>
+    }
+
+    <div class="row g-4">
+
+        <div class="col-lg-7">
+
+            <div class="card shadow-sm border-0 mb-4">
+
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        Información del contrato
+                    </h5>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="row mb-3">
+                        <div class="col-sm-5 text-muted">
+                            Número de contrato
+                        </div>
+
+                        <div class="col-sm-7 fw-semibold">
+                            @Model.NumeroContrato
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-5 text-muted">
+                            Cotización
+                        </div>
+
+                        <div class="col-sm-7">
+                            #@Model.CotizacionId
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-5 text-muted">
+                            Fecha del contrato
+                        </div>
+
+                        <div class="col-sm-7">
+                            @Model.FechaContrato.ToString("dd/MM/yyyy HH:mm")
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-5 text-muted">
+                            Estado
+                        </div>
+
+                        <div class="col-sm-7">
+                            <span class="badge bg-primary">
+                                @Model.Estado
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-5 text-muted">
+                            Creado por
+                        </div>
+
+                        <div class="col-sm-7">
+                            @(string.IsNullOrWhiteSpace(Model.UsuarioNombre)
+                                ? "No disponible"
+                                : Model.UsuarioNombre)
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0">
+
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        Información del evento
+                    </h5>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="row mb-3">
+                        <div class="col-sm-5 text-muted">
+                            Tipo de evento
+                        </div>
+
+                        <div class="col-sm-7">
+                            @Model.TipoEvento
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-5 text-muted">
+                            Fecha del evento
+                        </div>
+
+                        <div class="col-sm-7">
+                            @if (Model.FechaEvento != DateTime.MinValue)
+                            {
+                                @Model.FechaEvento.ToString("dd/MM/yyyy")
+                            }
+                            else
+                            {
+                                <span class="text-muted">
+                                    No disponible
+                                </span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-5 text-muted">
+                            Paquete
+                        </div>
+
+                        <div class="col-sm-7">
+                            @Model.PaqueteNombre
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-5 text-muted">
+                            Total contratado
+                        </div>
+
+                        <div class="col-sm-7 fw-bold text-primary">
+                            ₡@Model.Total.ToString("N2")
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-lg-5">
+
+            <div class="card shadow-sm border-0 mb-4">
+
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        Cliente
+                    </h5>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="mb-3">
+                        <div class="text-muted small">
+                            Nombre
+                        </div>
+
+                        <div class="fw-semibold">
+                            @Model.ClienteNombre
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="text-muted small">
+                            Correo electrónico
+                        </div>
+
+                        <div>
+                            @(string.IsNullOrWhiteSpace(Model.ClienteCorreo)
+                                ? "No disponible"
+                                : Model.ClienteCorreo)
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0 mb-4">
+
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        Observaciones
+                    </h5>
+                </div>
+
+                <div class="card-body">
+
+                    @if (string.IsNullOrWhiteSpace(Model.Observaciones))
+                    {
+                        <span class="text-muted">
+                            No hay observaciones registradas.
+                        </span>
+                    }
+                    else
+                    {
+                        <p class="mb-0"
+                           style="white-space: pre-line;">
+                            @Model.Observaciones
+                        </p>
+                    }
+
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0">
+
+                <div class="card-body">
+
+                    <form asp-action="Enviar"
+                          asp-route-id="@Model.ContratoId"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <button type="submit"
+                                class="btn btn-success w-100"
+                                onclick="return confirm('¿Desea enviar este contrato por correo al cliente?');">
+
+                            <i class="bi bi-envelope"></i>
+                            Enviar contrato al cliente
+
+                        </button>
+
+                    </form>
+
+                    <a asp-action="Index"
+                       class="btn btn-outline-secondary w-100 mt-2">
+
+                        <i class="bi bi-arrow-left"></i>
+                        Volver al listado
+
+                    </a>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>

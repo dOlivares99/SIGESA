@@ -23,6 +23,8 @@ public partial class Usuario
 
     public virtual ICollection<Cotizacion> Cotizacions { get; set; } = new List<Cotizacion>();
 
+    public virtual ICollection<Contrato> Contratos { get; set; } = new List<Contrato>();
+
     public virtual ICollection<Evento> Eventos { get; set; } = new List<Evento>();
 
     public virtual ICollection<Pago> Pagos { get; set; } = new List<Pago>();

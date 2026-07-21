@@ -286,6 +286,16 @@
             <a asp-controller="Cotizaciones" asp-action="Index"
                class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Cotizaciones" ? "active" : "")">
                 <i class="ti ti-file-invoice"></i> Cotizaciones
+
+                <a asp-controller="Contratos"
+                   asp-action="Index"
+                   class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Contratos" ? "active" : "")">
+
+                    <i class="ti ti-file-description"></i>
+
+                    Contratos
+
+                </a>
             </a>
             <a asp-controller="Pagos" asp-action="Index"
                class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Pagos" ? "active" : "")">

@@ -11,12 +11,20 @@ public class CotizacionesController : Controller
     private readonly string _apiBase;
 
     private static readonly JsonSerializerOptions JsonOpts =
-        new() { PropertyNameCaseInsensitive = true };
+        new()
+        {
+            PropertyNameCaseInsensitive = true
+        };
 
-    public CotizacionesController(IRestProvider restProvider, IConfiguration configuration)
+    public CotizacionesController(
+        IRestProvider restProvider,
+        IConfiguration configuration)
     {
         _restProvider = restProvider;
-        _apiBase = configuration["ApiSettings:BaseUrl"] ?? "http://localhost:5119/api";
+
+        _apiBase =
+            configuration["ApiSettings:BaseUrl"]
+            ?? "http://localhost:5119/api";
     }
 
     // GET /Cotizaciones
@@ -24,42 +32,120 @@ public class CotizacionesController : Controller
     {
         try
         {
-            var response = await _restProvider.GetAsync(_apiBase + "/cotizacionesapi");
-            var raw = JsonSerializer.Deserialize<List<JsonElement>>(response, JsonOpts) ?? new();
+            var response = await _restProvider.GetAsync(
+                _apiBase + "/cotizacionesapi");
 
-            var cotizaciones = raw.Select(e => new CotizacionViewModel
-            {
-                CotizacionId = e.GetProperty("cotizacionId").GetInt32(),
-                EventoId = e.GetProperty("eventoId").GetInt32(),
-                Total = e.GetProperty("total").GetDecimal(),
-                Estado = e.GetProperty("estado").GetString() ?? "",
-                FechaCreacion = e.GetProperty("fechaCreacion").GetDateTime(),
-                FechaVencimiento = e.TryGetProperty("fechaVencimiento", out var fv) &&
-                                   fv.ValueKind != JsonValueKind.Null
-                    ? fv.GetDateTime() : null,
-                ClienteNombre = e.TryGetProperty("evento", out var ev) &&
-                                ev.ValueKind != JsonValueKind.Null &&
-                                ev.TryGetProperty("cliente", out var cl) &&
-                                cl.ValueKind != JsonValueKind.Null
-                    ? cl.GetProperty("nombre").GetString() ?? "" : "",
-                TipoEvento = e.TryGetProperty("evento", out var ev2) &&
-                                ev2.ValueKind != JsonValueKind.Null
-                    ? ev2.GetProperty("tipoEvento").GetString() ?? "" : "",
-                PaqueteNombre = e.TryGetProperty("evento", out var ev3) &&
-                                ev3.ValueKind != JsonValueKind.Null &&
-                                ev3.TryGetProperty("paquete", out var pk) &&
-                                pk.ValueKind != JsonValueKind.Null
-                    ? pk.GetProperty("nombre").GetString() ?? "" : "",
-                UsuarioNombre = e.TryGetProperty("usuarioCreacionNavigation", out var u) &&
-                                u.ValueKind != JsonValueKind.Null
-                    ? u.GetProperty("nombre").GetString() ?? "" : "",
-            }).ToList();
+            var raw =
+                JsonSerializer.Deserialize<List<JsonElement>>(
+                    response,
+                    JsonOpts)
+                ?? new List<JsonElement>();
+
+            var cotizaciones = raw
+                .Select(e => new CotizacionViewModel
+                {
+                    CotizacionId =
+                        e.GetProperty("cotizacionId").GetInt32(),
+
+                    EventoId =
+                        e.GetProperty("eventoId").GetInt32(),
+
+                    Total =
+                        e.GetProperty("total").GetDecimal(),
+
+                    Estado =
+                        e.GetProperty("estado").GetString() ?? "",
+
+                    FechaCreacion =
+                        e.GetProperty("fechaCreacion").GetDateTime(),
+
+                    FechaVencimiento =
+                        e.TryGetProperty(
+                            "fechaVencimiento",
+                            out var fechaVencimiento)
+                        && fechaVencimiento.ValueKind
+                            != JsonValueKind.Null
+                            ? fechaVencimiento.GetDateTime()
+                            : null,
+
+                    ClienteNombre =
+                        e.TryGetProperty(
+                            "evento",
+                            out var evento)
+                        && evento.ValueKind != JsonValueKind.Null
+                        && evento.TryGetProperty(
+                            "cliente",
+                            out var cliente)
+                        && cliente.ValueKind != JsonValueKind.Null
+                        && cliente.TryGetProperty(
+                            "nombre",
+                            out var nombreCliente)
+                            ? nombreCliente.GetString() ?? ""
+                            : "",
+
+                    TipoEvento =
+                        e.TryGetProperty(
+                            "evento",
+                            out var eventoTipo)
+                        && eventoTipo.ValueKind != JsonValueKind.Null
+                        && eventoTipo.TryGetProperty(
+                            "tipoEvento",
+                            out var tipoEvento)
+                            ? tipoEvento.GetString() ?? ""
+                            : "",
+
+                    PaqueteNombre =
+                        e.TryGetProperty(
+                            "evento",
+                            out var eventoPaquete)
+                        && eventoPaquete.ValueKind
+                            != JsonValueKind.Null
+                        && eventoPaquete.TryGetProperty(
+                            "paquete",
+                            out var paquete)
+                        && paquete.ValueKind != JsonValueKind.Null
+                        && paquete.TryGetProperty(
+                            "nombre",
+                            out var nombrePaquete)
+                            ? nombrePaquete.GetString() ?? ""
+                            : "",
+
+                    UsuarioNombre =
+                        e.TryGetProperty(
+                            "usuarioCreacionNavigation",
+                            out var usuario)
+                        && usuario.ValueKind != JsonValueKind.Null
+                        && usuario.TryGetProperty(
+                            "nombre",
+                            out var nombreUsuario)
+                            ? nombreUsuario.GetString() ?? ""
+                            : "",
+
+                    TieneContrato =
+                        e.TryGetProperty(
+                            "tieneContrato",
+                            out var tieneContrato)
+                        && tieneContrato.ValueKind
+                            == JsonValueKind.True,
+
+                    ContratoId =
+                        e.TryGetProperty(
+                            "contratoId",
+                            out var contratoId)
+                        && contratoId.ValueKind
+                            == JsonValueKind.Number
+                            ? contratoId.GetInt32()
+                            : null
+                })
+                .ToList();
 
             return View(cotizaciones);
         }
         catch (Exception ex)
         {
-            ViewBag.Error = "Error al cargar cotizaciones: " + ex.Message;
+            ViewBag.Error =
+                "Error al cargar cotizaciones: " + ex.Message;
+
             return View(new List<CotizacionViewModel>());
         }
     }
@@ -68,37 +154,68 @@ public class CotizacionesController : Controller
     public async Task<IActionResult> Crear()
     {
         var model = new CotizacionFormViewModel();
+
         await CargarReservas(model);
+
         return View(model);
     }
 
     // POST /Cotizaciones/Crear
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Crear(CotizacionFormViewModel model)
+    public async Task<IActionResult> Crear(
+        CotizacionFormViewModel model)
     {
         if (!ModelState.IsValid)
         {
             await CargarReservas(model);
+
             return View(model);
         }
+
         try
         {
-            var usuarioId = int.Parse(HttpContext.Session.GetString("UsuarioId") ?? "0");
+            var usuarioIdTexto =
+                HttpContext.Session.GetString("UsuarioId");
+
+            if (!int.TryParse(
+                    usuarioIdTexto,
+                    out var usuarioId)
+                || usuarioId <= 0)
+            {
+                ModelState.AddModelError(
+                    "",
+                    "No se pudo identificar al usuario de la sesión.");
+
+                await CargarReservas(model);
+
+                return View(model);
+            }
+
             var json = JsonSerializer.Serialize(new
             {
                 model.EventoId,
                 model.FechaVencimiento,
                 UsuarioId = usuarioId
             });
-            await _restProvider.PostAsync(_apiBase + "/cotizacionesapi", json);
-            TempData["Exito"] = "Cotización creada correctamente.";
+
+            await _restProvider.PostAsync(
+                _apiBase + "/cotizacionesapi",
+                json);
+
+            TempData["Exito"] =
+                "Cotización creada correctamente.";
+
             return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)
         {
-            ModelState.AddModelError("", "Error al crear cotización: " + ex.Message);
+            ModelState.AddModelError(
+                "",
+                "Error al crear cotización: " + ex.Message);
+
             await CargarReservas(model);
+
             return View(model);
         }
     }
@@ -108,27 +225,63 @@ public class CotizacionesController : Controller
     {
         try
         {
-            var response = await _restProvider.GetAsync(_apiBase + "/cotizacionesapi/" + id);
-            var c = JsonSerializer.Deserialize<JsonElement>(response, JsonOpts);
+            var response = await _restProvider.GetAsync(
+                _apiBase + "/cotizacionesapi/" + id);
+
+            var cotizacion =
+                JsonSerializer.Deserialize<JsonElement>(
+                    response,
+                    JsonOpts);
 
             var model = new CotizacionFormViewModel
             {
-                CotizacionId = c.GetProperty("cotizacionId").GetInt32(),
-                EventoId = c.GetProperty("eventoId").GetInt32(),
-                Total = c.GetProperty("total").GetDecimal(),
-                Estado = c.GetProperty("estado").GetString() ?? "Borrador",
-                MotivoRechazo = c.TryGetProperty("motivoRechazo", out var mr) &&
-                                   mr.ValueKind != JsonValueKind.Null
-                    ? mr.GetString() : null,
-                FechaVencimiento = c.TryGetProperty("fechaVencimiento", out var fv) &&
-                                   fv.ValueKind != JsonValueKind.Null
-                    ? fv.GetDateTime() : null,
+                CotizacionId =
+                    cotizacion
+                        .GetProperty("cotizacionId")
+                        .GetInt32(),
+
+                EventoId =
+                    cotizacion
+                        .GetProperty("eventoId")
+                        .GetInt32(),
+
+                Total =
+                    cotizacion
+                        .GetProperty("total")
+                        .GetDecimal(),
+
+                Estado =
+                    cotizacion
+                        .GetProperty("estado")
+                        .GetString()
+                    ?? "Borrador",
+
+                MotivoRechazo =
+                    cotizacion.TryGetProperty(
+                        "motivoRechazo",
+                        out var motivoRechazo)
+                    && motivoRechazo.ValueKind
+                        != JsonValueKind.Null
+                        ? motivoRechazo.GetString()
+                        : null,
+
+                FechaVencimiento =
+                    cotizacion.TryGetProperty(
+                        "fechaVencimiento",
+                        out var fechaVencimiento)
+                    && fechaVencimiento.ValueKind
+                        != JsonValueKind.Null
+                        ? fechaVencimiento.GetDateTime()
+                        : null
             };
+
             return View(model);
         }
         catch (Exception ex)
         {
-            TempData["Error"] = "Error al cargar cotización: " + ex.Message;
+            TempData["Error"] =
+                "Error al cargar cotización: " + ex.Message;
+
             return RedirectToAction(nameof(Index));
         }
     }
@@ -136,9 +289,15 @@ public class CotizacionesController : Controller
     // POST /Cotizaciones/Editar/5
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Editar(int id, CotizacionFormViewModel model)
+    public async Task<IActionResult> Editar(
+        int id,
+        CotizacionFormViewModel model)
     {
-        if (!ModelState.IsValid) return View(model);
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
         try
         {
             var json = JsonSerializer.Serialize(new
@@ -148,42 +307,126 @@ public class CotizacionesController : Controller
                 model.Total,
                 model.FechaVencimiento
             });
-            await _restProvider.PutAsync(_apiBase + "/cotizacionesapi/" + id, json);
-            TempData["Exito"] = "Cotización actualizada correctamente.";
+
+            await _restProvider.PutAsync(
+                _apiBase + "/cotizacionesapi/" + id,
+                json);
+
+            TempData["Exito"] =
+                "Cotización actualizada correctamente.";
+
             return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)
         {
-            ModelState.AddModelError("", "Error al actualizar cotización: " + ex.Message);
+            ModelState.AddModelError(
+                "",
+                "Error al actualizar cotización: " + ex.Message);
+
             return View(model);
         }
     }
 
-    // Helper
-    private async Task CargarReservas(CotizacionFormViewModel model)
+    // POST /Cotizaciones/Enviar/5
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Enviar(int id)
     {
         try
         {
-            var response = await _restProvider.GetAsync(_apiBase + "/reservasapi");
-            var raw = JsonSerializer.Deserialize<List<JsonElement>>(response, JsonOpts) ?? new();
+            await _restProvider.PostAsync(
+                _apiBase + $"/cotizacionesapi/{id}/enviar",
+                "{}");
 
-            model.Reservas = raw
-                .Where(e => e.GetProperty("estado").GetString() != "Cancelada")
-                .Select(e => new ReservaOpcionViewModel
-                {
-                    EventoId = e.GetProperty("eventoId").GetInt32(),
-                    TipoEvento = e.GetProperty("tipoEvento").GetString() ?? "",
-                    FechaEvento = e.GetProperty("fechaEvento").GetDateTime(),
-                    MontoTotal = e.GetProperty("montoTotal").GetDecimal(),
-                    ClienteNombre = e.TryGetProperty("cliente", out var c) &&
-                                    c.ValueKind != JsonValueKind.Null
-                        ? c.GetProperty("nombre").GetString() ?? "" : "",
-                }).ToList();
+            TempData["Exito"] =
+                $"La cotización #{id} fue enviada correctamente al cliente.";
+
+            return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)
         {
-            ViewBag.ErrorReservas = "Error cargando reservas: " + ex.Message;
-            model.Reservas = new();
+            TempData["Error"] =
+                $"No se pudo enviar la cotización #{id}: {ex.Message}";
+
+            return RedirectToAction(nameof(Index));
+        }
+    }
+
+    // GET /Cotizaciones/DescargarPdf/5
+    public async Task<IActionResult> DescargarPdf(int id)
+    {
+        try
+        {
+            var url =
+                _apiBase + $"/cotizacionesapi/{id}/pdf";
+
+            return Redirect(url);
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] =
+                $"No se pudo descargar la cotización #{id}: {ex.Message}";
+
+            return RedirectToAction(nameof(Index));
+        }
+    }
+
+    // Helper
+    private async Task CargarReservas(
+        CotizacionFormViewModel model)
+    {
+        try
+        {
+            var response = await _restProvider.GetAsync(
+                _apiBase + "/reservasapi");
+
+            var raw =
+                JsonSerializer.Deserialize<List<JsonElement>>(
+                    response,
+                    JsonOpts)
+                ?? new List<JsonElement>();
+
+            model.Reservas = raw
+                .Where(e =>
+                    !e.TryGetProperty(
+                        "estado",
+                        out var estado)
+                    || estado.GetString() != "Cancelada")
+                .Select(e => new ReservaOpcionViewModel
+                {
+                    EventoId =
+                        e.GetProperty("eventoId").GetInt32(),
+
+                    TipoEvento =
+                        e.GetProperty("tipoEvento").GetString()
+                        ?? "",
+
+                    FechaEvento =
+                        e.GetProperty("fechaEvento").GetDateTime(),
+
+                    MontoTotal =
+                        e.GetProperty("montoTotal").GetDecimal(),
+
+                    ClienteNombre =
+                        e.TryGetProperty(
+                            "cliente",
+                            out var cliente)
+                        && cliente.ValueKind != JsonValueKind.Null
+                        && cliente.TryGetProperty(
+                            "nombre",
+                            out var nombreCliente)
+                            ? nombreCliente.GetString() ?? ""
+                            : ""
+                })
+                .ToList();
+        }
+        catch (Exception ex)
+        {
+            ViewBag.ErrorReservas =
+                "Error cargando reservas: " + ex.Message;
+
+            model.Reservas =
+                new List<ReservaOpcionViewModel>();
         }
     }
 }

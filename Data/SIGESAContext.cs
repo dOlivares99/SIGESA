@@ -18,6 +18,8 @@ public partial class SIGESAContext : DbContext
 
     public virtual DbSet<Cotizacion> Cotizacions { get; set; }
 
+    public virtual DbSet<Contrato> Contratos { get; set; }
+
     public virtual DbSet<Evento> Eventos { get; set; }
 
     public virtual DbSet<EventoServicio> EventoServicios { get; set; }
@@ -101,6 +103,47 @@ public partial class SIGESAContext : DbContext
                 .HasForeignKey(d => d.UsuarioCreacion)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Cotizacion_Usuario");
+        });
+
+        modelBuilder.Entity<Contrato>(entity =>
+        {
+            entity.ToTable("Contrato");
+
+            entity.HasIndex(e => e.CotizacionId, "UQ_Contrato_CotizacionId")
+                .IsUnique();
+
+            entity.HasIndex(e => e.NumeroContrato, "UQ_Contrato_NumeroContrato")
+                .IsUnique();
+
+            entity.Property(e => e.Estado)
+                .HasMaxLength(20)
+                .HasDefaultValue("Pendiente");
+
+            entity.Property(e => e.FechaContrato)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+
+            entity.Property(e => e.NumeroContrato)
+                .HasMaxLength(30);
+
+            entity.Property(e => e.Observaciones)
+                .HasMaxLength(1000);
+
+            entity.Property(e => e.RutaPdf)
+                .HasMaxLength(500)
+                .HasColumnName("RutaPDF");
+
+            entity.HasOne(d => d.Cotizacion)
+                .WithOne(p => p.Contrato)
+                .HasForeignKey<Contrato>(d => d.CotizacionId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Contrato_Cotizacion");
+
+            entity.HasOne(d => d.UsuarioCreacionNavigation)
+                .WithMany(p => p.Contratos)
+                .HasForeignKey(d => d.UsuarioCreacion)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Contrato_Usuario");
         });
 
         modelBuilder.Entity<Evento>(entity =>

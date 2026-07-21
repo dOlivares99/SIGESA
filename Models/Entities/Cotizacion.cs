@@ -26,4 +26,6 @@ public partial class Cotizacion
     public virtual Evento Evento { get; set; } = null!;
 
     public virtual Usuario UsuarioCreacionNavigation { get; set; } = null!;
+
+    public virtual Contrato? Contrato { get; set; }
 }
