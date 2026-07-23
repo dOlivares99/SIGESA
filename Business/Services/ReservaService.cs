@@ -58,6 +58,10 @@ public class ReservaService : IReservaService
 
     public async Task<bool> CrearAsync(CrearReservaDto dto, int usuarioId)
     {
+        if (dto.FechaEvento < DateOnly.FromDateTime(DateTime.Today))
+        {
+            return false;
+        }
         var evento = new Evento
         {
             ClienteId = dto.ClienteId,
@@ -85,6 +89,11 @@ public class ReservaService : IReservaService
 
     public async Task<bool> ActualizarAsync(int id, ActualizarReservaDto dto)
     {
+        if (dto.FechaEvento < DateOnly.FromDateTime(DateTime.Today))
+        {
+            return false;
+        }
+
         var evento = await _repo.FindConDetallesAsync(id);
         if (evento == null) return false;
 
@@ -97,7 +106,15 @@ public class ReservaService : IReservaService
         evento.MontoTotal = dto.MontoTotal;
         evento.Notas = dto.Notas;
 
+        var serviciosAnteriores = evento.EventoServicios.ToList();
+
+        if (serviciosAnteriores.Count > 0)
+        {
+            _repo.EliminarServicios(serviciosAnteriores);
+        }
+
         evento.EventoServicios.Clear();
+
         foreach (var s in dto.Servicios)
         {
             evento.EventoServicios.Add(new EventoServicio

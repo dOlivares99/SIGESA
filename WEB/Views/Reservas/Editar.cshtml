@@ -26,6 +26,7 @@
 
 <form asp-action="Editar" asp-route-id="@Model.EventoId" method="post" id="formReserva">
     @Html.AntiForgeryToken()
+    <input asp-for="EventoId" type="hidden" />
 
     <div class="row g-4">
 
@@ -61,7 +62,10 @@
                     <div class="row g-3 mb-3">
                         <div class="col-12 col-sm-6">
                             <label class="form-label fw-medium">Fecha del evento</label>
-                            <input asp-for="FechaEvento" type="date" class="form-control"
+                            <input asp-for="FechaEvento"
+                                   type="date"
+                                   class="form-control"
+                                   min="@DateTime.Today.ToString("yyyy-MM-dd")"
                                    value="@Model.FechaEvento.ToString("yyyy-MM-dd")" />
                             <span asp-validation-for="FechaEvento" class="text-danger small"></span>
                         </div>

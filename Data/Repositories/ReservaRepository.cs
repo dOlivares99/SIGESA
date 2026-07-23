@@ -10,6 +10,8 @@ public interface IReservaRepository
     Task<Evento?> FindConDetallesAsync(int id);
     Task<bool> CreateAsync(Evento entity);
     Task<bool> UpdateAsync(Evento entity);
+    void EliminarServicios(IEnumerable<EventoServicio> servicios);
+
     Task<bool> DeleteAsync(Evento entity);
 }
 
@@ -49,6 +51,12 @@ public class ReservaRepository : RepositoryBase<Evento>, IReservaRepository
         DbContext.Update(entity);
         return await DbContext.SaveChangesAsync() > 0;
     }
+
+    public void EliminarServicios(IEnumerable<EventoServicio> servicios)
+    {
+        DbContext.Set<EventoServicio>().RemoveRange(servicios);
+    }
+
 
     public new async Task<bool> DeleteAsync(Evento entity)
     {
