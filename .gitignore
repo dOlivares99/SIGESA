@@ -21,3 +21,9 @@ Thumbs.db
 publish/
 out/
 /API/appsettings.json
+
+# Artefactos de despliegue
+api.zip
+web.zip
+publish-api/
+publish-web/
