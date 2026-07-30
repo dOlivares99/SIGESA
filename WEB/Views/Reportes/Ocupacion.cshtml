@@ -1,0 +1,207 @@
+﻿@model WEB.Models.ViewModels.OcupacionViewModel
+@{
+    ViewData["Title"] = "Reporte de ocupación";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h5 class="fw-bold mb-0">Reporte de ocupación</h5>
+        <small class="text-muted">Eventos y servicios del año @Model.Anio</small>
+    </div>
+    <div class="d-flex gap-2 align-items-center">
+        <form asp-action="Ocupacion" method="get" class="d-flex gap-2">
+            <select name="anio" class="form-select form-select-sm" style="width:100px;">
+                @for (int y = DateTime.Now.Year; y >= DateTime.Now.Year - 3; y--)
+                {
+                    <option value="@y" selected="@(y == Model.Anio)">@y</option>
+                }
+            </select>
+            <button type="submit" class="btn btn-sm btn-outline-secondary">
+                <i class="ti ti-refresh"></i>
+            </button>
+        </form>
+        <a asp-action="OcupacionExcel" asp-route-anio="@Model.Anio"
+           class="btn btn-sm btn-outline-success">
+            <i class="ti ti-file-spreadsheet me-1"></i> Excel
+        </a>
+        <a asp-action="OcupacionPdf" asp-route-anio="@Model.Anio"
+           class="btn btn-sm btn-outline-danger">
+            <i class="ti ti-file-type-pdf me-1"></i> PDF
+        </a>
+    </div>
+</div>
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger"><i class="ti ti-alert-circle me-1"></i>@ViewBag.Error</div>
+}
+
+<!-- KPIs -->
+<div class="row g-3 mb-4">
+    <div class="col-12 col-md-6">
+        <div class="card h-100">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center"
+                         style="width:48px;height:48px;background:#f0eeff;">
+                        <i class="ti ti-calendar-event" style="color:#534AB7;font-size:1.4rem;"></i>
+                    </div>
+                    <div>
+                        <small class="text-muted d-block">Total eventos @Model.Anio</small>
+                        <span class="fw-bold fs-4" style="color:#534AB7;">@Model.TotalEventos</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6">
+        <div class="card h-100">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center"
+                         style="width:48px;height:48px;background:#e6f4f0;">
+                        <i class="ti ti-chart-bar" style="color:#0F6E56;font-size:1.4rem;"></i>
+                    </div>
+                    <div>
+                        <small class="text-muted d-block">Mes con más eventos</small>
+                        <span class="fw-bold fs-4" style="color:#0F6E56;">
+                            @Model.MesMaximo
+                            <small class="fs-6 fw-normal text-muted">(@Model.CantidadMesMaximo eventos)</small>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Gráfica Chart.js -->
+<div class="card mb-4">
+    <div class="card-body p-4">
+        <h6 class="fw-semibold mb-3">
+            <i class="ti ti-chart-bar me-1" style="color:#534AB7;"></i>
+            Eventos por mes — @Model.Anio
+        </h6>
+        @if (Model.TotalEventos == 0)
+        {
+            <div class="text-center text-muted py-4">
+                <i class="ti ti-chart-off" style="font-size:2rem;"></i>
+                <p class="mt-2 mb-0">Sin eventos registrados en @Model.Anio</p>
+            </div>
+        }
+        else
+        {
+            <canvas id="chartOcupacion" height="80"></canvas>
+        }
+    </div>
+</div>
+
+<!-- Servicios más contratados -->
+<div class="card">
+    <div class="card-body">
+        <h6 class="fw-semibold mb-3">
+            <i class="ti ti-tool me-1" style="color:#534AB7;"></i>
+            Servicios más contratados
+        </h6>
+        @if (!Model.Servicios.Any())
+        {
+            <div class="text-center text-muted py-4">
+                <i class="ti ti-tool-off" style="font-size:2rem;"></i>
+                <p class="mt-2 mb-0">Sin servicios contratados en @Model.Anio</p>
+            </div>
+        }
+        else
+        {
+            <table class="table table-hover align-middle mb-0">
+                <thead style="background:#f8f7ff;">
+                    <tr>
+                        <th class="ps-3 py-3" style="color:#534AB7;">#</th>
+                        <th class="py-3" style="color:#534AB7;">Servicio</th>
+                        <th class="py-3" style="color:#534AB7;">Categoría</th>
+                        <th class="py-3" style="color:#534AB7;">Frecuencia</th>
+                        <th class="py-3" style="color:#534AB7;">Ingresos</th>
+                        <th class="py-3" style="color:#534AB7;">Popularidad</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        var maxFrecuencia = Model.Servicios.Max(s => s.Frecuencia);
+                    }
+                    @for (int i = 0; i < Model.Servicios.Count; i++)
+                    {
+                        var s = Model.Servicios[i];
+                        var pct = maxFrecuencia > 0
+                            ? (int)Math.Round((double)s.Frecuencia / maxFrecuencia * 100)
+                            : 0;
+                        <tr>
+                            <td class="ps-3 text-muted small">@(i + 1)</td>
+                            <td class="fw-medium">@s.Nombre</td>
+                            <td>
+                                <span class="badge rounded-pill px-3"
+                                      style="background:#f0eeff;color:#534AB7;">
+                                    @s.Categoria
+                                </span>
+                            </td>
+                            <td class="fw-medium">@s.Frecuencia</td>
+                            <td class="fw-medium">₡@s.Ingresos.ToString("N2")</td>
+                            <td style="min-width:120px;">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div style="flex:1;height:6px;background:#ece9ff;border-radius:3px;">
+                                        <div style="width:@(pct)%;height:100%;background:#534AB7;border-radius:3px;"></div>
+                                    </div>
+                                    <small class="text-muted">@pct%</small>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const labels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.PorMes.Select(m => m.Nombre)));
+        const datos = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.PorMes.Select(m => m.Cantidad)));
+        const canvas = document.getElementById('chartOcupacion');
+
+        if (canvas) {
+            new Chart(canvas, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Eventos',
+                        data: datos,
+                        backgroundColor: '#534AB7',
+                        borderRadius: 6,
+                        borderSkipped: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => ` ${ctx.parsed.y} evento${ctx.parsed.y !== 1 ? 's' : ''}`
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1 },
+                            grid: { color: '#ece9ff' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+}

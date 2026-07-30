@@ -1,8 +1,665 @@
-﻿@{
-    ViewData["Title"] = "SIGESA";
+﻿@model WEB.Models.ViewModels.DashboardViewModel
+
+@{
+    ViewData["Title"] = "Dashboard";
+
+    string ObtenerColorEstado(string estado)
+    {
+        return estado switch
+        {
+            "Confirmada" => "#0F6E56",
+            "Realizada" => "#1A56DB",
+            "Cancelada" => "#993C1D",
+            "EnProceso" => "#854F0B",
+            "Pendiente" => "#534AB7",
+            _ => "#534AB7"
+        };
+    }
+
+    string ObtenerFondoEstado(string estado)
+    {
+        return estado switch
+        {
+            "Confirmada" => "#E6F4F0",
+            "Realizada" => "#E8F0FE",
+            "Cancelada" => "#FDF0ED",
+            "EnProceso" => "#FDF5E6",
+            "Pendiente" => "#F0EEFF",
+            _ => "#F0EEFF"
+        };
+    }
 }
 
-<div class="text-center py-5">
-    <h1 class="display-4 fw-bold" style="color:#534AB7;">SIGESA</h1>
-    <p class="lead text-muted">Gestión de Sala de Eventos</p>
+<style>
+    .dash-card {
+        border-radius: 12px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+        background: white;
+    }
+
+    .kpi-value {
+        font-size: 1.4rem;
+        font-weight: 700;
+        line-height: 1.1;
+    }
+
+    .kpi-value-sm {
+        font-size: 1.1rem;
+        font-weight: 700;
+        line-height: 1.1;
+    }
+
+    .section-title {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #534AB7;
+        margin-bottom: 6px;
+    }
+
+    .item-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 5px 0;
+        border-bottom: 1px solid #f0eeff;
+    }
+
+        .item-row:last-child {
+            border-bottom: none;
+        }
+
+    .badge-estado {
+        display: block;
+        font-size: 0.65rem;
+        padding: 2px 8px;
+        border-radius: 20px;
+        white-space: nowrap;
+    }
+
+    .mini-icon {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .mini-cal {
+        width: 36px;
+        height: 36px;
+        border-radius: 6px;
+        background: #f0eeff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h6 class="fw-bold mb-0">Dashboard</h6>
+
+        <small class="text-muted" style="font-size:0.72rem;">
+            <i class="ti ti-calendar me-1"></i>
+            @Model.MesActual
+        </small>
+    </div>
+
+    <a asp-controller="Reservas"
+       asp-action="Crear"
+       class="btn btn-primary btn-sm px-3"
+       style="font-size:0.78rem;">
+        <i class="ti ti-plus me-1"></i>
+        Nueva reserva
+    </a>
 </div>
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger py-2 mb-2"
+         style="font-size:0.8rem;">
+        <i class="ti ti-alert-circle me-1"></i>
+        @ViewBag.Error
+    </div>
+}
+
+@if (Model.TieneSaldosPendientes)
+{
+    <div class="mb-3 px-3 py-2 rounded d-flex align-items-center gap-2 flex-wrap"
+         style="background:#FDF5E6; border-left:3px solid #854F0B;">
+
+        <i class="ti ti-alert-triangle"
+           style="color:#854F0B; font-size:0.9rem;">
+        </i>
+
+        <span style="color:#854F0B; font-size:0.78rem; font-weight:600;">
+            @Model.AlertasSaldo.Count evento(s) con saldo pendiente próximo:
+        </span>
+
+        @foreach (var alerta in Model.AlertasSaldo)
+        {
+            <span class="badge rounded-pill"
+                  style="background:rgba(133,79,11,0.12);
+                color:#854F0B;
+                font-size:0.68rem;
+                font-weight:500;">
+                @alerta.ClienteNombre · ₡@alerta.SaldoPendiente.ToString("N0")
+            </span>
+        }
+    </div>
+}
+
+<div class="row g-2 mb-2">
+
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="dash-card p-3 h-100"
+             style="border-top:3px solid #534AB7;">
+
+            <div class="mini-icon mb-2"
+                 style="background:#F0EEFF;">
+                <i class="ti ti-calendar-event"
+                   style="color:#534AB7; font-size:0.9rem;">
+                </i>
+            </div>
+
+            <div class="kpi-value"
+                 style="color:#534AB7;">
+                @Model.EventosMes
+            </div>
+
+            <small class="text-muted"
+                   style="font-size:0.7rem;">
+                Eventos del mes
+            </small>
+
+            @if (Model.EventosMes == 0)
+            {
+                <div style="font-size:0.65rem; color:#AAA;">
+                    Sin eventos
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="dash-card p-3 h-100"
+             style="border-top:3px solid #0F6E56;">
+
+            <div class="mini-icon mb-2"
+                 style="background:#E6F4F0;">
+                <i class="ti ti-cash"
+                   style="color:#0F6E56; font-size:0.9rem;">
+                </i>
+            </div>
+
+            <div class="kpi-value-sm"
+                 style="color:#0F6E56;">
+                ₡@Model.IngresosMes.ToString("N0")
+            </div>
+
+            <small class="text-muted"
+                   style="font-size:0.7rem;">
+                Ingresos del mes
+            </small>
+
+            @if (Model.IngresosMes == 0)
+            {
+                <div style="font-size:0.65rem; color:#AAA;">
+                    Sin ingresos
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="dash-card p-3 h-100"
+             style="border-top:3px solid #993C1D;">
+
+            <div class="mini-icon mb-2"
+                 style="background:#FDF0ED;">
+                <i class="ti ti-clock-dollar"
+                   style="color:#993C1D; font-size:0.9rem;">
+                </i>
+            </div>
+
+            <div class="kpi-value-sm"
+                 style="color:#993C1D;">
+                ₡@Model.SaldoPendienteTotal.ToString("N0")
+            </div>
+
+            <small class="text-muted"
+                   style="font-size:0.7rem;">
+                Saldo pendiente
+            </small>
+
+            @if (Model.SaldoPendienteTotal == 0)
+            {
+                <div style="font-size:0.65rem; color:#AAA;">
+                    Todo saldado
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="dash-card p-3 h-100"
+             style="border-top:3px solid #1A56DB;">
+
+            <div class="mini-icon mb-2"
+                 style="background:#E8F0FE;">
+                <i class="ti ti-users"
+                   style="color:#1A56DB; font-size:0.9rem;">
+                </i>
+            </div>
+
+            <div class="kpi-value"
+                 style="color:#1A56DB;">
+                @Model.TotalClientes
+            </div>
+
+            <small class="text-muted"
+                   style="font-size:0.7rem;">
+                Clientes
+            </small>
+        </div>
+    </div>
+
+</div>
+
+<div class="row g-2">
+
+    <div class="col-12 col-lg-5">
+        <div class="dash-card p-3 h-100">
+
+            <div class="section-title">
+                <i class="ti ti-chart-bar me-1"></i>
+                Eventos por mes @DateTime.Now.Year
+            </div>
+
+            @if (Model.GraficaMeses == null ||
+                 !Model.GraficaMeses.Any() ||
+                 Model.GraficaMeses.All(m => m.Cantidad == 0))
+            {
+                <div class="text-center text-muted py-3"
+                     style="font-size:0.78rem;">
+                    Sin eventos este año
+                </div>
+            }
+            else
+            {
+                <canvas id="chartEventos"
+                        height="130">
+                </canvas>
+            }
+
+        </div>
+    </div>
+
+    <div class="col-12 col-lg-2">
+        <div class="dash-card p-3 h-100">
+
+            <div class="section-title">
+                <i class="ti ti-chart-donut me-1"></i>
+                Estados
+            </div>
+
+            @if (Model.PorEstado == null || !Model.PorEstado.Any())
+            {
+                <div class="text-muted text-center py-2"
+                     style="font-size:0.75rem;">
+                    Sin datos
+                </div>
+            }
+            else
+            {
+                <canvas id="chartEstados"
+                        class="mb-2"
+                        style="width:100%; max-height:100px;">
+                </canvas>
+            }
+
+            @if (Model.PorEstado != null && Model.PorEstado.Any())
+            {
+                foreach (var estado in Model.PorEstado)
+                {
+                    var colorEstado = ObtenerColorEstado(estado.Estado);
+
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+
+                        <div class="d-flex align-items-center gap-1">
+
+                            <span style="@($"display:inline-block; width:7px; height:7px; border-radius:50%; background-color:{colorEstado}; flex-shrink:0;")">
+                            </span>
+
+                            <span style="font-size:0.68rem; color:#555;">
+                                @estado.Estado
+                            </span>
+
+                        </div>
+
+                        <span class="fw-bold"
+                              style="@($"font-size:0.72rem; color:{colorEstado};")">
+                            @estado.Cantidad
+                        </span>
+
+                    </div>
+                }
+            }
+
+        </div>
+    </div>
+
+    <div class="col-12 col-lg-3">
+        <div class="dash-card p-3 h-100">
+
+            <div class="d-flex justify-content-between align-items-center mb-1">
+
+                <div class="section-title mb-0">
+                    <i class="ti ti-calendar-time me-1"></i>
+                    Próximos eventos
+                </div>
+
+                <a asp-controller="Reservas"
+                   asp-action="Index"
+                   style="font-size:0.68rem; color:#534AB7;">
+                    Ver todos
+                </a>
+
+            </div>
+
+            @if (Model.ProximosEventos == null || !Model.ProximosEventos.Any())
+            {
+                <div class="text-center text-muted py-3"
+                     style="font-size:0.75rem;">
+                    Sin eventos próximos
+                </div>
+            }
+            else
+            {
+                foreach (var evento in Model.ProximosEventos)
+                {
+                    var colorTexto = ObtenerColorEstado(evento.Estado);
+                    var colorFondo = ObtenerFondoEstado(evento.Estado);
+                    var fechaValida = DateTime.TryParse(
+                        evento.FechaEvento,
+                        out var fechaEvento
+                    );
+
+                    <div class="item-row">
+
+                        <div class="mini-cal">
+
+                            @if (fechaValida)
+                            {
+                                <span class="fw-bold"
+                                      style="color:#534AB7;
+                                    font-size:0.8rem;
+                                    line-height:1;">
+                                    @fechaEvento.Day
+                                </span>
+
+                                <span style="color:#534AB7;
+                                    font-size:0.55rem;
+                                    line-height:1;">
+                                    @fechaEvento.ToString("MMM").ToUpper()
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="fw-bold"
+                                      style="color:#534AB7; font-size:0.7rem;">
+                                    --
+                                </span>
+                            }
+
+                        </div>
+
+                        <div class="flex-grow-1 overflow-hidden">
+
+                            <div class="text-truncate fw-medium"
+                                 style="font-size:0.75rem;">
+                                @evento.ClienteNombre
+                            </div>
+
+                            <div class="text-truncate text-muted"
+                                 style="font-size:0.65rem;">
+                                @evento.TipoEvento
+                            </div>
+
+                        </div>
+
+                        <div class="text-end flex-shrink-0">
+
+                            <span class="badge-estado"
+                                  style="@($"background-color:{colorFondo}; color:{colorTexto};")">
+                                @evento.Estado
+                            </span>
+
+                            @if (evento.SaldoPendiente > 0)
+                            {
+                                <small class="text-danger d-block"
+                                       style="font-size:0.62rem;">
+                                    ₡@evento.SaldoPendiente.ToString("N0")
+                                </small>
+                            }
+
+                        </div>
+
+                    </div>
+                }
+            }
+
+        </div>
+    </div>
+
+    <div class="col-12 col-lg-2">
+        <div class="dash-card p-3 h-100">
+
+            <div class="d-flex justify-content-between align-items-center mb-1">
+
+                <div class="section-title mb-0">
+                    <i class="ti ti-receipt me-1"></i>
+                    Últimos pagos
+                </div>
+
+                <a asp-controller="Pagos"
+                   asp-action="Index"
+                   style="font-size:0.68rem; color:#534AB7;">
+                    Ver
+                </a>
+
+            </div>
+
+            @if (Model.UltimosPagos == null || !Model.UltimosPagos.Any())
+            {
+                <div class="text-center text-muted py-3"
+                     style="font-size:0.75rem;">
+                    Sin pagos
+                </div>
+            }
+            else
+            {
+                foreach (var pago in Model.UltimosPagos)
+                {
+                    <div class="item-row">
+
+                        <div class="mini-icon"
+                             style="background:#E6F4F0;">
+                            <i class="ti ti-cash"
+                               style="color:#0F6E56; font-size:0.75rem;">
+                            </i>
+                        </div>
+
+                        <div class="flex-grow-1 overflow-hidden">
+
+                            <div class="text-truncate fw-medium"
+                                 style="font-size:0.72rem;">
+                                @pago.ClienteNombre
+                            </div>
+
+                            <div class="text-muted text-truncate"
+                                 style="font-size:0.62rem;">
+                                @pago.FechaPago
+                            </div>
+
+                        </div>
+
+                        <div class="fw-bold text-nowrap"
+                             style="color:#0F6E56; font-size:0.72rem;">
+                            ₡@pago.Monto.ToString("N0")
+                        </div>
+
+                    </div>
+                }
+            }
+
+        </div>
+    </div>
+
+</div>
+
+@section Scripts
+{
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            const ctxBarras = document.getElementById('chartEventos');
+
+            if (ctxBarras) {
+                const labels = @Html.Raw(
+                                                    System.Text.Json.JsonSerializer.Serialize(
+                                                            Model.GraficaMeses.Select(m => m.Mes)
+                                    )
+                                    );
+
+                const datos = @Html.Raw(
+                                                    System.Text.Json.JsonSerializer.Serialize(
+                                                            Model.GraficaMeses.Select(m => m.Cantidad)
+                                    )
+                                    );
+
+                const maxVal = datos.length > 0
+                    ? Math.max(...datos)
+                    : 0;
+
+                new Chart(ctxBarras, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: datos,
+                            backgroundColor: datos.map(function(valor) {
+                                return valor === maxVal && maxVal > 0
+                                    ? '#534AB7'
+                                    : '#DDD9FF';
+                            }),
+                            borderRadius: 4,
+                            borderSkipped: false
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const cantidad = context.parsed.y;
+
+                                        return ' ' +
+                                            cantidad +
+                                            ' evento' +
+                                            (cantidad !== 1 ? 's' : '');
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1,
+                                    color: '#6C757D',
+                                    font: {
+                                        size: 9
+                                    }
+                                },
+                                grid: {
+                                    color: '#F0EEFF'
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    color: '#6C757D',
+                                    font: {
+                                        size: 9
+                                    }
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            const ctxDona = document.getElementById('chartEstados');
+
+            if (ctxDona) {
+                const estadosLabels = @Html.Raw(
+                                                    System.Text.Json.JsonSerializer.Serialize(
+                                                            Model.PorEstado.Select(e => e.Estado)
+                                    )
+                                    );
+
+                const estadosDatos = @Html.Raw(
+                                                    System.Text.Json.JsonSerializer.Serialize(
+                                                            Model.PorEstado.Select(e => e.Cantidad)
+                                    )
+                                    );
+
+                const coloresDona = {
+                    Confirmada: '#0F6E56',
+                    Realizada: '#1A56DB',
+                    Cancelada: '#993C1D',
+                    EnProceso: '#854F0B',
+                    Pendiente: '#534AB7'
+                };
+
+                new Chart(ctxDona, {
+                    type: 'doughnut',
+                    data: {
+                        labels: estadosLabels,
+                        datasets: [{
+                            data: estadosDatos,
+                            backgroundColor: estadosLabels.map(function(estado) {
+                                return coloresDona[estado] || '#534AB7';
+                            }),
+                            borderWidth: 0,
+                            hoverOffset: 3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        cutout: '68%',
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+            }
+
+        });
+    </script>
+}

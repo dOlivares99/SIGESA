@@ -1,0 +1,169 @@
+﻿@model WEB.Models.ViewModels.ReporteResultadoViewModel
+@{
+    ViewData["Title"] = "Resultado del reporte";
+    var filtro = ViewBag.Filtro as WEB.Models.ViewModels.ReporteViewModel;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h5 class="fw-bold mb-0">Reporte de ingresos</h5>
+        <small class="text-muted">
+            Periodo: @Model.Desde — @Model.Hasta
+        </small>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary">
+            <i class="ti ti-arrow-left me-1"></i> Nuevo reporte
+        </a>
+        @if (filtro != null)
+        {
+            <a asp-action="DescargarExcel"
+               asp-route-desde="@filtro.Desde.ToString("yyyy-MM-dd")"
+               asp-route-hasta="@filtro.Hasta.ToString("yyyy-MM-dd")"
+               class="btn btn-sm btn-outline-success">
+                <i class="ti ti-file-spreadsheet me-1"></i> Excel
+            </a>
+            <a asp-action="DescargarPdf"
+               asp-route-desde="@filtro.Desde.ToString("yyyy-MM-dd")"
+               asp-route-hasta="@filtro.Hasta.ToString("yyyy-MM-dd")"
+               class="btn btn-sm btn-outline-danger">
+                <i class="ti ti-file-type-pdf me-1"></i> PDF
+            </a>
+        }
+    </div>
+</div>
+
+@if (Model.SinDatos)
+{
+    <div class="card">
+        <div class="card-body text-center text-muted py-5">
+            <i class="ti ti-chart-off" style="font-size:2.5rem;"></i>
+            <p class="mt-2 mb-0 fw-medium">Sin información disponible</p>
+            <small>No existen pagos registrados en el periodo seleccionado.</small>
+        </div>
+    </div>
+}
+else
+{
+    <!-- Resumen -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-md-6">
+            <div class="card h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center"
+                             style="width:48px;height:48px;background:#f0eeff;">
+                            <i class="ti ti-cash" style="color:#534AB7;font-size:1.4rem;"></i>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block">Total ingresos</small>
+                            <span class="fw-bold fs-4" style="color:#534AB7;">
+                                ₡@Model.TotalIngresos.ToString("N2")
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="card h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center"
+                             style="width:48px;height:48px;background:#e6f4f0;">
+                            <i class="ti ti-receipt" style="color:#0F6E56;font-size:1.4rem;"></i>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block">Total pagos</small>
+                            <span class="fw-bold fs-4" style="color:#0F6E56;">@Model.TotalPagos</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Desglose por tipo -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h6 class="fw-semibold mb-3">
+                <i class="ti ti-chart-pie me-1" style="color:#534AB7;"></i>
+                Desglose por tipo de evento
+            </h6>
+            <table class="table table-hover align-middle mb-0">
+                <thead style="background:#f8f7ff;">
+                    <tr>
+                        <th class="ps-3 py-3" style="color:#534AB7;">Tipo de evento</th>
+                        <th class="py-3" style="color:#534AB7;">Cantidad de pagos</th>
+                        <th class="py-3" style="color:#534AB7;">Total</th>
+                        <th class="py-3" style="color:#534AB7;">% del total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var d in Model.Desglose)
+                    {
+                        var pct = Model.TotalIngresos > 0
+                            ? Math.Round(d.Total / Model.TotalIngresos * 100, 1)
+                            : 0;
+                        <tr>
+                            <td class="ps-3 fw-medium">@d.TipoEvento</td>
+                            <td class="text-muted">@d.Cantidad</td>
+                            <td class="fw-medium">₡@d.Total.ToString("N2")</td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div style="width:80px;height:6px;background:#ece9ff;border-radius:3px;">
+                                        <div style="width:@(pct)%;height:100%;background:#534AB7;border-radius:3px;"></div>
+                                    </div>
+                                    <small class="text-muted">@pct%</small>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Detalle de pagos -->
+    <div class="card">
+        <div class="card-body">
+            <h6 class="fw-semibold mb-3">
+                <i class="ti ti-list me-1" style="color:#534AB7;"></i>
+                Detalle de pagos
+            </h6>
+            <table class="table table-hover align-middle mb-0">
+                <thead style="background:#f8f7ff;">
+                    <tr>
+                        <th class="ps-3 py-3" style="color:#534AB7;">#</th>
+                        <th class="py-3" style="color:#534AB7;">Fecha</th>
+                        <th class="py-3" style="color:#534AB7;">Cliente</th>
+                        <th class="py-3" style="color:#534AB7;">Tipo de evento</th>
+                        <th class="py-3" style="color:#534AB7;">Tipo de pago</th>
+                        <th class="py-3" style="color:#534AB7;">Monto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var d in Model.Detalle)
+                    {
+                        <tr>
+                            <td class="ps-3 text-muted small">@d.PagoId</td>
+                            <td class="text-muted small">@d.FechaPago</td>
+                            <td class="fw-medium">@d.ClienteNombre</td>
+                            <td class="text-muted">@d.TipoEvento</td>
+                            <td class="text-muted">@d.TipoPago</td>
+                            <td class="fw-medium">₡@d.Monto.ToString("N2")</td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr style="background:#f8f7ff;">
+                        <td colspan="5" class="ps-3 fw-bold" style="color:#534AB7;">TOTAL</td>
+                        <td class="fw-bold" style="color:#534AB7;">
+                            ₡@Model.TotalIngresos.ToString("N2")
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+}

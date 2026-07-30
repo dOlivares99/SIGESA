@@ -1,0 +1,101 @@
+﻿@model WEB.Models.ViewModels.ReporteViewModel
+@{
+    ViewData["Title"] = "Reporte de ingresos";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h5 class="fw-bold mb-0">Reporte de ingresos</h5>
+        <small class="text-muted">Consulta los ingresos por periodo de fecha</small>
+    </div>
+    <a asp-action="Ocupacion" class="btn btn-sm btn-outline-secondary">
+        <i class="ti ti-chart-dots me-1"></i> Ver ocupación
+    </a>
+</div>
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger"><i class="ti ti-alert-circle me-1"></i>@ViewBag.Error</div>
+}
+
+<div class="row g-4">
+
+    <div class="col-12 col-lg-5">
+        <div class="card h-100">
+            <div class="card-body p-4">
+                <h6 class="fw-semibold mb-3">
+                    <i class="ti ti-filter me-1" style="color:#534AB7;"></i>
+                    Selecciona el periodo
+                </h6>
+                <form asp-action="Generar" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="mb-3">
+                        <label asp-for="Desde" class="form-label fw-medium">Fecha inicio</label>
+                        <input asp-for="Desde" type="date" class="form-control" />
+                    </div>
+                    <div class="mb-4">
+                        <label asp-for="Hasta" class="form-label fw-medium">Fecha fin</label>
+                        <input asp-for="Hasta" type="date" class="form-control" />
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="ti ti-chart-bar me-1"></i> Generar reporte
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-lg-7">
+        <div class="card h-100" style="background:#f8f7ff;border:1.5px solid #ece9ff;">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center"
+                         style="width:40px;height:40px;background:#534AB7;">
+                        <i class="ti ti-report-money text-white"></i>
+                    </div>
+                    <div>
+                        <div class="fw-semibold" style="color:#534AB7;">¿Qué incluye este reporte?</div>
+                        <small class="text-muted">Información generada</small>
+                    </div>
+                </div>
+                <hr style="border-color:#ece9ff;">
+                <div class="d-flex align-items-start gap-2 mb-3">
+                    <i class="ti ti-circle-check mt-1" style="color:#0F6E56;"></i>
+                    <div>
+                        <div class="fw-medium small">Total de ingresos del periodo</div>
+                        <small class="text-muted">Suma de todos los pagos recibidos.</small>
+                    </div>
+                </div>
+                <div class="d-flex align-items-start gap-2 mb-3">
+                    <i class="ti ti-circle-check mt-1" style="color:#0F6E56;"></i>
+                    <div>
+                        <div class="fw-medium small">Desglose por tipo de evento</div>
+                        <small class="text-muted">Ingresos agrupados por categoría de evento.</small>
+                    </div>
+                </div>
+                <div class="d-flex align-items-start gap-2 mb-3">
+                    <i class="ti ti-circle-check mt-1" style="color:#0F6E56;"></i>
+                    <div>
+                        <div class="fw-medium small">Detalle de cada pago</div>
+                        <small class="text-muted">Listado completo con cliente, fecha y monto.</small>
+                    </div>
+                </div>
+                <div class="d-flex align-items-start gap-2">
+                    <i class="ti ti-circle-check mt-1" style="color:#0F6E56;"></i>
+                    <div>
+                        <div class="fw-medium small">Exportar a PDF y Excel</div>
+                        <small class="text-muted">Descarga el reporte en el formato que necesites.</small>
+                    </div>
+                </div>
+                <hr style="border-color:#ece9ff;">
+                <div class="d-flex align-items-start gap-2 mt-3">
+                    <i class="ti ti-info-circle mt-1" style="color:#534AB7;"></i>
+                    <small class="text-muted">
+                        Los botones de exportar aparecerán después de generar el reporte.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
