@@ -31,7 +31,7 @@ public class PaquetesController : Controller
         }
         catch (Exception ex)
         {
-            ViewBag.Error = "Error al cargar paquetes: " + ex.Message;
+            ViewBag.Error = "Error al cargar los paquetes. Intente más tarde.";
             return View(new List<PaqueteViewModel>());
         }
     }
@@ -66,7 +66,7 @@ public class PaquetesController : Controller
         }
         catch (Exception ex)
         {
-            ModelState.AddModelError("", "Error al registrar paquete: " + ex.Message);
+            ModelState.AddModelError("", "Error al registrar el paquete. Intente más tarde.");
             return View(model);
         }
     }
@@ -92,7 +92,7 @@ public class PaquetesController : Controller
         }
         catch (Exception ex)
         {
-            TempData["Error"] = "Error al cargar paquete: " + ex.Message;
+            TempData["Error"] = "Error al cargar el paquete. Intente más tarde.";
             return RedirectToAction(nameof(Index));
         }
     }
@@ -133,7 +133,7 @@ public class PaquetesController : Controller
         }
         catch (Exception ex)
         {
-            ModelState.AddModelError("", "Error al actualizar paquete: " + ex.Message);
+            ModelState.AddModelError("", "Error al actualizar el paquete. Intente más tarde.");
             return View(model);
         }
     }
@@ -151,7 +151,7 @@ public class PaquetesController : Controller
         }
         catch (Exception ex)
         {
-            TempData["Error"] = "Error al cambiar estado: " + ex.Message;
+            TempData["Error"] = "Error al cambiar el estado. Intente más tarde.";
         }
         return RedirectToAction(nameof(Index));
     }

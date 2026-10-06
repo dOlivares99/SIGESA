@@ -56,7 +56,7 @@ public class SaldosController : Controller
         }
         catch (Exception ex)
         {
-            ViewBag.Error = "Error al cargar saldos: " + ex.Message;
+            ViewBag.Error = "Error al cargar los saldos. Intente más tarde.";
             return View(new List<SaldoViewModel>());
         }
     }

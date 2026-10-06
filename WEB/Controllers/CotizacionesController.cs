@@ -144,7 +144,7 @@ public class CotizacionesController : Controller
         catch (Exception ex)
         {
             ViewBag.Error =
-                "Error al cargar cotizaciones: " + ex.Message;
+                "Error al cargar las cotizaciones. Intente más tarde.";
 
             return View(new List<CotizacionViewModel>());
         }
@@ -212,7 +212,7 @@ public class CotizacionesController : Controller
         {
             ModelState.AddModelError(
                 "",
-                "Error al crear cotización: " + ex.Message);
+                "Error al crear la cotización. Intente más tarde.");
 
             await CargarReservas(model);
 
@@ -280,7 +280,7 @@ public class CotizacionesController : Controller
         catch (Exception ex)
         {
             TempData["Error"] =
-                "Error al cargar cotización: " + ex.Message;
+                "Error al cargar la cotización. Intente más tarde.";
 
             return RedirectToAction(nameof(Index));
         }
@@ -321,7 +321,7 @@ public class CotizacionesController : Controller
         {
             ModelState.AddModelError(
                 "",
-                "Error al actualizar cotización: " + ex.Message);
+                "Error al actualizar la cotización. Intente más tarde.");
 
             return View(model);
         }
@@ -346,7 +346,7 @@ public class CotizacionesController : Controller
         catch (Exception ex)
         {
             TempData["Error"] =
-                $"No se pudo enviar la cotización #{id}: {ex.Message}";
+                $"No se pudo enviar la cotización #{id}. Intente más tarde.";
 
             return RedirectToAction(nameof(Index));
         }
@@ -365,7 +365,7 @@ public class CotizacionesController : Controller
         catch (Exception ex)
         {
             TempData["Error"] =
-                $"No se pudo descargar la cotización #{id}: {ex.Message}";
+                $"No se pudo descargar la cotización #{id}. Intente más tarde.";
 
             return RedirectToAction(nameof(Index));
         }
@@ -423,7 +423,7 @@ public class CotizacionesController : Controller
         catch (Exception ex)
         {
             ViewBag.ErrorReservas =
-                "Error cargando reservas: " + ex.Message;
+                "Error al cargar las reservas. Intente más tarde.";
 
             model.Reservas =
                 new List<ReservaOpcionViewModel>();

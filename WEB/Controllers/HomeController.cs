@@ -92,7 +92,7 @@ public class HomeController : Controller
         }
         catch (Exception ex)
         {
-            ViewBag.Error = "Error al cargar el dashboard: " + ex.Message;
+            ViewBag.Error = "Error al cargar el dashboard. Intente más tarde.";
             return View(new DashboardViewModel());
         }
     }

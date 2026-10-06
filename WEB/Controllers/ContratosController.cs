@@ -50,7 +50,7 @@ public class ContratosController : Controller
         catch (Exception ex)
         {
             ViewBag.Error =
-                "Error al cargar los contratos: " + ex.Message;
+                "Error al cargar los contratos. Intente más tarde.";
 
             return View(new List<ContratoViewModel>());
         }
@@ -125,7 +125,7 @@ public class ContratosController : Controller
         {
             ModelState.AddModelError(
                 "",
-                "Error al crear el contrato: " + ex.Message);
+                "Error al crear el contrato. Intente más tarde.");
 
             await CargarCotizaciones(model);
 
@@ -153,7 +153,7 @@ public class ContratosController : Controller
         catch (Exception ex)
         {
             TempData["Error"] =
-                "Error al cargar el contrato: " + ex.Message;
+                "Error al cargar el contrato. Intente más tarde.";
 
             return RedirectToAction(nameof(Index));
         }
@@ -211,7 +211,7 @@ public class ContratosController : Controller
         catch (Exception ex)
         {
             TempData["Error"] =
-                "Error al cargar el contrato: " + ex.Message;
+                "Error al cargar el contrato. Intente más tarde.";
 
             return RedirectToAction(nameof(Index));
         }
@@ -254,7 +254,7 @@ public class ContratosController : Controller
         {
             ModelState.AddModelError(
                 "",
-                "Error al actualizar el contrato: " + ex.Message);
+                "Error al actualizar el contrato. Intente más tarde.");
 
             return View(model);
         }
@@ -279,7 +279,7 @@ public class ContratosController : Controller
         catch (Exception ex)
         {
             TempData["Error"] =
-                "No se pudo enviar el contrato: " + ex.Message;
+                "No se pudo enviar el contrato. Intente más tarde.";
 
             return RedirectToAction(nameof(Index));
         }
@@ -298,7 +298,7 @@ public class ContratosController : Controller
         catch (Exception ex)
         {
             TempData["Error"] =
-                "No se pudo descargar el contrato: " + ex.Message;
+                "No se pudo descargar el contrato. Intente más tarde.";
 
             return RedirectToAction(nameof(Index));
         }
@@ -373,7 +373,7 @@ public class ContratosController : Controller
         catch (Exception ex)
         {
             ViewBag.ErrorCotizaciones =
-                "Error cargando cotizaciones: " + ex.Message;
+                "Error al cargar las cotizaciones. Intente más tarde.";
 
             model.Cotizaciones =
                 new List<CotizacionContratoOpcionViewModel>();

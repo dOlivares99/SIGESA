@@ -31,7 +31,7 @@ public class ClientesController : Controller
         }
         catch (Exception ex)
         {
-            ViewBag.Error = "Error al cargar clientes: " + ex.Message;
+            ViewBag.Error = "Error al cargar los clientes. Intente más tarde.";
             return View(new List<ClienteViewModel>());
         }
     }
@@ -60,7 +60,7 @@ public class ClientesController : Controller
         }
         catch (Exception ex)
         {
-            ModelState.AddModelError("", "Error al crear cliente: " + ex.Message);
+            ModelState.AddModelError("", "Error al crear el cliente. Intente más tarde.");
             return View(model);
         }
     }
@@ -86,7 +86,7 @@ public class ClientesController : Controller
         }
         catch (Exception ex)
         {
-            ViewBag.Error = "Error al cargar cliente: " + ex.Message;
+            ViewBag.Error = "Error al cargar el cliente. Intente más tarde.";
             return NotFound();
         }
     }
@@ -112,7 +112,7 @@ public class ClientesController : Controller
         }
         catch (Exception ex)
         {
-            ModelState.AddModelError("", "Error al actualizar cliente: " + ex.Message);
+            ModelState.AddModelError("", "Error al actualizar el cliente. Intente más tarde.");
             return View(model);
         }
     }
@@ -161,7 +161,7 @@ public class ClientesController : Controller
         }
         catch (Exception ex)
         {
-            TempData["Error"] = "Error al cargar historial: " + ex.Message;
+            TempData["Error"] = "Error al cargar el historial. Intente más tarde.";
             return RedirectToAction(nameof(Index));
         }
     }

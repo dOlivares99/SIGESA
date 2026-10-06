@@ -48,7 +48,7 @@ public class ReservasController : Controller
         }
         catch (Exception ex)
         {
-            ViewBag.Error = "Error al cargar reservas: " + ex.Message;
+            ViewBag.Error = "Error al cargar las reservas. Intente más tarde.";
             return View(new List<ReservaViewModel>());
         }
     }
@@ -96,7 +96,7 @@ public class ReservasController : Controller
         }
         catch (Exception ex)
         {
-            ModelState.AddModelError("", "Error al crear la reserva: " + ex.Message);
+            ModelState.AddModelError("", "Error al crear la reserva. Intente más tarde.");
             await CargarListas(model);
             return View(model);
         }
@@ -141,7 +141,7 @@ public class ReservasController : Controller
         }
         catch (Exception ex)
         {
-            TempData["Error"] = "Error al cargar la reserva: " + ex.Message;
+            TempData["Error"] = "Error al cargar la reserva. Intente más tarde.";
             return RedirectToAction(nameof(Index));
         }
     }
@@ -180,7 +180,7 @@ public class ReservasController : Controller
         }
         catch (Exception ex)
         {
-            ModelState.AddModelError("", "Error al actualizar la reserva: " + ex.Message);
+            ModelState.AddModelError("", "Error al actualizar la reserva. Intente más tarde.");
             await CargarListas(model);
             return View(model);
         }
@@ -199,7 +199,7 @@ public class ReservasController : Controller
         }
         catch (Exception ex)
         {
-            TempData["Error"] = "Error al eliminar la reserva: " + ex.Message;
+            TempData["Error"] = "Error al eliminar la reserva. Intente más tarde.";
         }
         return RedirectToAction(nameof(Index));
     }

@@ -226,9 +226,7 @@ public class CotizacionesApiController(
             return StatusCode(500, new
             {
                 mensaje =
-                    "No se pudo enviar el correo de la cotización.",
-
-                detalle = ex.Message
+                    "No se pudo enviar el correo de la cotización."
             });
         }
         catch (Exception ex)
@@ -236,9 +234,7 @@ public class CotizacionesApiController(
             return StatusCode(500, new
             {
                 mensaje =
-                    "Ocurrió un error al enviar la cotización.",
-
-                detalle = ex.Message
+                    "Ocurrió un error al enviar la cotización."
             });
         }
     }

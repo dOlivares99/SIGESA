@@ -196,7 +196,7 @@
 
         const permitidos = ['image/jpeg', 'image/png'];
         if (!permitidos.includes(file.type)) {
-            alert('Solo se permiten imágenes JPG o PNG.');
+            notyf.error('Solo se permiten imágenes JPG o PNG.');
             this.value = '';
             preview.classList.add('d-none');
             return;

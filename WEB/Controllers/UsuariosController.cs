@@ -33,7 +33,7 @@ public class UsuariosController : Controller
         }
         catch (Exception ex)
         {
-            ViewBag.Error = "Error al cargar usuarios: " + ex.Message;
+            ViewBag.Error = "Error al cargar los usuarios. Intente más tarde.";
             return View(new List<UsuarioViewModel>());
         }
     }
@@ -60,7 +60,7 @@ public class UsuariosController : Controller
         }
         catch (Exception ex)
         {
-            ModelState.AddModelError("", "Error al crear usuario: " + ex.Message);
+            ModelState.AddModelError("", "Error al crear el usuario. Intente más tarde.");
             return View(model);
         }
     }
@@ -78,7 +78,7 @@ public class UsuariosController : Controller
         }
         catch (Exception ex)
         {
-            ViewBag.Error = "Error al cargar usuario: " + ex.Message;
+            ViewBag.Error = "Error al cargar el usuario. Intente más tarde.";
             return NotFound();
         }
     }
@@ -102,7 +102,7 @@ public class UsuariosController : Controller
         }
         catch (Exception ex)
         {
-            ModelState.AddModelError("", "Error al actualizar usuario: " + ex.Message);
+            ModelState.AddModelError("", "Error al actualizar el usuario. Intente más tarde.");
             return View(model);
         }
     }

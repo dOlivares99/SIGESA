@@ -40,8 +40,7 @@ public class ContratosApiController : ControllerBase
                 StatusCodes.Status500InternalServerError,
                 new
                 {
-                    mensaje = "Error al obtener los contratos.",
-                    detalle = ex.Message
+                    mensaje = "Error al obtener los contratos."
                 });
         }
     }
@@ -71,8 +70,7 @@ public class ContratosApiController : ControllerBase
                 StatusCodes.Status500InternalServerError,
                 new
                 {
-                    mensaje = "Error al obtener el contrato.",
-                    detalle = ex.Message
+                    mensaje = "Error al obtener el contrato."
                 });
         }
     }
@@ -106,8 +104,7 @@ public class ContratosApiController : ControllerBase
                 new
                 {
                     mensaje =
-                        "Error al obtener el contrato por cotización.",
-                    detalle = ex.Message
+                        "Error al obtener el contrato por cotización."
                 });
         }
     }
@@ -163,8 +160,7 @@ public class ContratosApiController : ControllerBase
                 StatusCodes.Status500InternalServerError,
                 new
                 {
-                    mensaje = "Error al crear el contrato.",
-                    detalle = ex.Message
+                    mensaje = "Error al crear el contrato."
                 });
         }
     }
@@ -212,8 +208,7 @@ public class ContratosApiController : ControllerBase
                 StatusCodes.Status500InternalServerError,
                 new
                 {
-                    mensaje = "Error al actualizar el contrato.",
-                    detalle = ex.Message
+                    mensaje = "Error al actualizar el contrato."
                 });
         }
     }
@@ -253,8 +248,7 @@ public class ContratosApiController : ControllerBase
                 new
                 {
                     mensaje =
-                        "Error al generar el PDF del contrato.",
-                    detalle = ex.Message
+                        "Error al generar el PDF del contrato."
                 });
         }
     }
@@ -349,8 +343,7 @@ public class ContratosApiController : ControllerBase
                 new
                 {
                     mensaje =
-                        "No se pudo enviar el correo del contrato.",
-                    detalle = ex.Message
+                        "No se pudo enviar el correo del contrato."
                 });
         }
         catch (Exception ex)
@@ -359,8 +352,7 @@ public class ContratosApiController : ControllerBase
                 StatusCodes.Status500InternalServerError,
                 new
                 {
-                    mensaje = "Error al enviar el contrato.",
-                    detalle = ex.Message
+                    mensaje = "Error al enviar el contrato."
                 });
         }
     }

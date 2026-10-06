@@ -39,7 +39,7 @@ public class ServiciosController : Controller
         }
         catch (Exception ex)
         {
-            ViewBag.Error = "Error al cargar servicios: " + ex.Message;
+            ViewBag.Error = "Error al cargar los servicios. Intente más tarde.";
             return View(new List<ServicioViewModel>());
         }
     }
@@ -72,7 +72,7 @@ public class ServiciosController : Controller
         }
         catch (Exception ex)
         {
-            ModelState.AddModelError("", "Error al registrar servicio: " + ex.Message);
+            ModelState.AddModelError("", "Error al registrar el servicio. Intente más tarde.");
             return View(model);
         }
     }
@@ -96,7 +96,7 @@ public class ServiciosController : Controller
         }
         catch (Exception ex)
         {
-            TempData["Error"] = "Error al cargar servicio: " + ex.Message;
+            TempData["Error"] = "Error al cargar el servicio. Intente más tarde.";
             return RedirectToAction(nameof(Index));
         }
     }
@@ -126,7 +126,7 @@ public class ServiciosController : Controller
         }
         catch (Exception ex)
         {
-            ModelState.AddModelError("", "Error al actualizar servicio: " + ex.Message);
+            ModelState.AddModelError("", "Error al actualizar el servicio. Intente más tarde.");
             return View(model);
         }
     }
@@ -144,7 +144,7 @@ public class ServiciosController : Controller
         }
         catch (Exception ex)
         {
-            TempData["Error"] = "Error al cambiar estado: " + ex.Message;
+            TempData["Error"] = "Error al cambiar el estado. Intente más tarde.";
         }
         return RedirectToAction(nameof(Index));
     }

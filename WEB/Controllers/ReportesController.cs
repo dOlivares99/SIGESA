@@ -80,7 +80,7 @@ public class ReportesController : Controller
         }
         catch (Exception ex)
         {
-            ViewBag.Error = "Error al generar reporte: " + ex.Message;
+            ViewBag.Error = "Error al generar el reporte. Intente más tarde.";
             return View("Index", filtro);
         }
     }
@@ -143,7 +143,7 @@ public class ReportesController : Controller
         }
         catch (Exception ex)
         {
-            ViewBag.Error = "Error al cargar reporte: " + ex.Message;
+            ViewBag.Error = "Error al cargar el reporte. Intente más tarde.";
             return View(new OcupacionViewModel { Anio = anioConsulta });
         }
     }

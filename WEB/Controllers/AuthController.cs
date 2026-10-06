@@ -136,7 +136,7 @@ public class AuthController : Controller
         }
         catch (Exception ex)
         {
-            ModelState.AddModelError("", "No se pudo cambiar la contraseña: " + ex.Message);
+            ModelState.AddModelError("", "No se pudo cambiar la contraseña. Intente más tarde.");
             return View(model);
         }
     }

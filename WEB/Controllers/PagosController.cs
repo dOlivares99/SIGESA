@@ -53,7 +53,7 @@ public class PagosController : Controller
         }
         catch (Exception ex)
         {
-            ViewBag.Error = "Error al cargar pagos: " + ex.Message;
+            ViewBag.Error = "Error al cargar los pagos. Intente más tarde.";
             return View(new List<PagoViewModel>());
         }
     }
@@ -124,7 +124,7 @@ public class PagosController : Controller
         }
         catch (Exception ex)
         {
-            ModelState.AddModelError("", "Error al registrar el pago: " + ex.Message);
+            ModelState.AddModelError("", "Error al registrar el pago. Intente más tarde.");
             await CargarListas(model);
             return View(model);
         }
@@ -141,7 +141,7 @@ public class PagosController : Controller
         }
         catch (Exception ex)
         {
-            TempData["Error"] = "Error al eliminar el pago: " + ex.Message;
+            TempData["Error"] = "Error al eliminar el pago. Intente más tarde.";
         }
         return RedirectToAction(nameof(Index));
     }
