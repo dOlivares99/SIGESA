@@ -1,4 +1,4 @@
-﻿@model WEB.Models.ViewModels.DashboardViewModel
+@model WEB.Models.ViewModels.DashboardViewModel
 
 @{
     ViewData["Title"] = "Dashboard";
@@ -32,53 +32,47 @@
 
 <style>
     .dash-card {
-        border-radius: 12px;
+        border-radius: 16px;
         box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
         background: white;
+        transition: box-shadow 0.15s ease, transform 0.15s ease;
     }
 
+        .dash-card:hover {
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+        }
+
     .kpi-value {
-        font-size: 1.4rem;
+        font-size: 1.85rem;
         font-weight: 700;
-        line-height: 1.1;
+        line-height: 1.15;
     }
 
     .kpi-value-sm {
-        font-size: 1.1rem;
+        font-size: 1.4rem;
         font-weight: 700;
-        line-height: 1.1;
+        line-height: 1.15;
     }
 
     .section-title {
-        font-size: 0.78rem;
+        font-size: 0.82rem;
         font-weight: 600;
         color: #534AB7;
-        margin-bottom: 6px;
+        margin-bottom: 10px;
     }
 
-    .item-row {
+    .list-card {
         display: flex;
         align-items: center;
-        gap: 8px;
-        padding: 5px 0;
-        border-bottom: 1px solid #f0eeff;
-    }
-
-        .item-row:last-child {
-            border-bottom: none;
-        }
-
-    .badge-estado {
-        display: block;
-        font-size: 0.65rem;
-        padding: 2px 8px;
-        border-radius: 20px;
-        white-space: nowrap;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 12px;
     }
 
     .mini-icon {
-        width: 30px;
-        height: 30px;
+        width: 38px;
+        height: 38px;
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -87,9 +81,9 @@
     }
 
     .mini-cal {
-        width: 36px;
-        height: 36px;
-        border-radius: 6px;
+        width: 42px;
+        height: 42px;
+        border-radius: 8px;
         background: #f0eeff;
         display: flex;
         flex-direction: column;
@@ -97,22 +91,34 @@
         justify-content: center;
         flex-shrink: 0;
     }
+
+    .estado-bar {
+        display: flex;
+        height: 14px;
+        border-radius: 20px;
+        overflow: hidden;
+        background: #fff;
+        gap: 2px;
+    }
+
+        .estado-bar span {
+            display: block;
+        }
 </style>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
     <div>
-        <h6 class="fw-bold mb-0">Dashboard</h6>
+        <h4 class="fw-bold mb-1">Dashboard</h4>
 
-        <small class="text-muted" style="font-size:0.72rem;">
+        <div class="text-muted" style="font-size:0.85rem;">
             <i class="ti ti-calendar me-1"></i>
             @Model.MesActual
-        </small>
+        </div>
     </div>
 
     <a asp-controller="Reservas"
        asp-action="Crear"
-       class="btn btn-primary btn-sm px-3"
-       style="font-size:0.78rem;">
+       class="btn btn-primary px-4">
         <i class="ti ti-plus me-1"></i>
         Nueva reserva
     </a>
@@ -120,8 +126,8 @@
 
 @if (ViewBag.Error != null)
 {
-    <div class="alert alert-danger py-2 mb-2"
-         style="font-size:0.8rem;">
+    <div class="alert alert-danger py-2 mb-3"
+         style="font-size:0.85rem;">
         <i class="ti ti-alert-circle me-1"></i>
         @ViewBag.Error
     </div>
@@ -129,14 +135,14 @@
 
 @if (Model.TieneSaldosPendientes)
 {
-    <div class="mb-3 px-3 py-2 rounded d-flex align-items-center gap-2 flex-wrap"
+    <div class="mb-4 px-3 py-3 rounded d-flex align-items-center gap-2 flex-wrap"
          style="background:#FDF5E6; border-left:3px solid #854F0B;">
 
         <i class="ti ti-alert-triangle"
-           style="color:#854F0B; font-size:0.9rem;">
+           style="color:#854F0B; font-size:1rem;">
         </i>
 
-        <span style="color:#854F0B; font-size:0.78rem; font-weight:600;">
+        <span style="color:#854F0B; font-size:0.82rem; font-weight:600;">
             @Model.AlertasSaldo.Count evento(s) con saldo pendiente próximo:
         </span>
 
@@ -145,7 +151,7 @@
             <span class="badge rounded-pill"
                   style="background:rgba(133,79,11,0.12);
                 color:#854F0B;
-                font-size:0.68rem;
+                font-size:0.72rem;
                 font-weight:500;">
                 @alerta.ClienteNombre · ₡@alerta.SaldoPendiente.ToString("N0")
             </span>
@@ -153,16 +159,15 @@
     </div>
 }
 
-<div class="row g-2 mb-2">
+<div class="row g-3 mb-3">
 
     <div class="col-12 col-sm-6 col-lg-3">
-        <div class="dash-card p-3 h-100"
-             style="border-top:3px solid #534AB7;">
+        <div class="dash-card p-4 h-100">
 
-            <div class="mini-icon mb-2"
-                 style="background:#F0EEFF;">
+            <div class="mini-icon mb-3"
+                 style="background:#534AB7; width:44px; height:44px; border-radius:12px;">
                 <i class="ti ti-calendar-event"
-                   style="color:#534AB7; font-size:0.9rem;">
+                   style="color:#fff; font-size:1.1rem;">
                 </i>
             </div>
 
@@ -172,13 +177,13 @@
             </div>
 
             <small class="text-muted"
-                   style="font-size:0.7rem;">
+                   style="font-size:0.76rem;">
                 Eventos del mes
             </small>
 
             @if (Model.EventosMes == 0)
             {
-                <div style="font-size:0.65rem; color:#AAA;">
+                <div style="font-size:0.68rem; color:#AAA;">
                     Sin eventos
                 </div>
             }
@@ -186,13 +191,12 @@
     </div>
 
     <div class="col-12 col-sm-6 col-lg-3">
-        <div class="dash-card p-3 h-100"
-             style="border-top:3px solid #0F6E56;">
+        <div class="dash-card p-4 h-100">
 
-            <div class="mini-icon mb-2"
-                 style="background:#E6F4F0;">
+            <div class="mini-icon mb-3"
+                 style="background:#0F6E56; width:44px; height:44px; border-radius:12px;">
                 <i class="ti ti-cash"
-                   style="color:#0F6E56; font-size:0.9rem;">
+                   style="color:#fff; font-size:1.1rem;">
                 </i>
             </div>
 
@@ -202,13 +206,13 @@
             </div>
 
             <small class="text-muted"
-                   style="font-size:0.7rem;">
+                   style="font-size:0.76rem;">
                 Ingresos del mes
             </small>
 
             @if (Model.IngresosMes == 0)
             {
-                <div style="font-size:0.65rem; color:#AAA;">
+                <div style="font-size:0.68rem; color:#AAA;">
                     Sin ingresos
                 </div>
             }
@@ -216,13 +220,12 @@
     </div>
 
     <div class="col-12 col-sm-6 col-lg-3">
-        <div class="dash-card p-3 h-100"
-             style="border-top:3px solid #993C1D;">
+        <div class="dash-card p-4 h-100">
 
-            <div class="mini-icon mb-2"
-                 style="background:#FDF0ED;">
+            <div class="mini-icon mb-3"
+                 style="background:#993C1D; width:44px; height:44px; border-radius:12px;">
                 <i class="ti ti-clock-dollar"
-                   style="color:#993C1D; font-size:0.9rem;">
+                   style="color:#fff; font-size:1.1rem;">
                 </i>
             </div>
 
@@ -232,13 +235,13 @@
             </div>
 
             <small class="text-muted"
-                   style="font-size:0.7rem;">
+                   style="font-size:0.76rem;">
                 Saldo pendiente
             </small>
 
             @if (Model.SaldoPendienteTotal == 0)
             {
-                <div style="font-size:0.65rem; color:#AAA;">
+                <div style="font-size:0.68rem; color:#AAA;">
                     Todo saldado
                 </div>
             }
@@ -246,13 +249,12 @@
     </div>
 
     <div class="col-12 col-sm-6 col-lg-3">
-        <div class="dash-card p-3 h-100"
-             style="border-top:3px solid #1A56DB;">
+        <div class="dash-card p-4 h-100">
 
-            <div class="mini-icon mb-2"
-                 style="background:#E8F0FE;">
+            <div class="mini-icon mb-3"
+                 style="background:#1A56DB; width:44px; height:44px; border-radius:12px;">
                 <i class="ti ti-users"
-                   style="color:#1A56DB; font-size:0.9rem;">
+                   style="color:#fff; font-size:1.1rem;">
                 </i>
             </div>
 
@@ -262,7 +264,7 @@
             </div>
 
             <small class="text-muted"
-                   style="font-size:0.7rem;">
+                   style="font-size:0.76rem;">
                 Clientes
             </small>
         </div>
@@ -270,10 +272,10 @@
 
 </div>
 
-<div class="row g-2">
+<div class="row g-3">
 
     <div class="col-12 col-lg-5">
-        <div class="dash-card p-3 h-100">
+        <div class="dash-card p-4 h-100">
 
             <div class="section-title">
                 <i class="ti ti-chart-bar me-1"></i>
@@ -284,15 +286,15 @@
                  !Model.GraficaMeses.Any() ||
                  Model.GraficaMeses.All(m => m.Cantidad == 0))
             {
-                <div class="text-center text-muted py-3"
-                     style="font-size:0.78rem;">
+                <div class="text-center text-muted py-4"
+                     style="font-size:0.82rem;">
                     Sin eventos este año
                 </div>
             }
             else
             {
                 <canvas id="chartEventos"
-                        height="130">
+                        height="220">
                 </canvas>
             }
 
@@ -303,46 +305,49 @@
         <div class="dash-card p-3 h-100">
 
             <div class="section-title">
-                <i class="ti ti-chart-donut me-1"></i>
+                <i class="ti ti-list-details me-1"></i>
                 Estados
             </div>
 
-            @if (Model.PorEstado == null || !Model.PorEstado.Any())
+            @if (Model.PorEstado == null ||
+                 !Model.PorEstado.Any() ||
+                 Model.PorEstado.All(e => e.Cantidad == 0))
             {
                 <div class="text-muted text-center py-2"
-                     style="font-size:0.75rem;">
+                     style="font-size:0.78rem;">
                     Sin datos
                 </div>
             }
             else
             {
-                <canvas id="chartEstados"
-                        class="mb-2"
-                        style="width:100%; max-height:100px;">
-                </canvas>
-            }
+                <div class="estado-bar mb-3">
+                    @foreach (var estado in Model.PorEstado.Where(e => e.Cantidad > 0))
+                    {
+                        <span style="@($"flex-grow:{estado.Cantidad}; flex-basis:0; background-color:{ObtenerColorEstado(estado.Estado)};")"></span>
+                    }
+                </div>
 
-            @if (Model.PorEstado != null && Model.PorEstado.Any())
-            {
-                foreach (var estado in Model.PorEstado)
+                @foreach (var estado in Model.PorEstado)
                 {
                     var colorEstado = ObtenerColorEstado(estado.Estado);
+                    var colorFondo = ObtenerFondoEstado(estado.Estado);
 
-                    <div class="d-flex justify-content-between align-items-center mb-1">
+                    <div class="list-card justify-content-between mb-2"
+                         style="background:@colorFondo; padding:7px 10px;">
 
-                        <div class="d-flex align-items-center gap-1">
+                        <div class="d-flex align-items-center gap-2">
 
-                            <span style="@($"display:inline-block; width:7px; height:7px; border-radius:50%; background-color:{colorEstado}; flex-shrink:0;")">
+                            <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background-color:@colorEstado; flex-shrink:0;">
                             </span>
 
-                            <span style="font-size:0.68rem; color:#555;">
+                            <span style="font-size:0.74rem; color:#555;">
                                 @estado.Estado
                             </span>
 
                         </div>
 
                         <span class="fw-bold"
-                              style="@($"font-size:0.72rem; color:{colorEstado};")">
+                              style="font-size:0.76rem; color:@colorEstado;">
                             @estado.Cantidad
                         </span>
 
@@ -356,7 +361,7 @@
     <div class="col-12 col-lg-3">
         <div class="dash-card p-3 h-100">
 
-            <div class="d-flex justify-content-between align-items-center mb-1">
+            <div class="d-flex justify-content-between align-items-center mb-2">
 
                 <div class="section-title mb-0">
                     <i class="ti ti-calendar-time me-1"></i>
@@ -365,7 +370,7 @@
 
                 <a asp-controller="Reservas"
                    asp-action="Index"
-                   style="font-size:0.68rem; color:#534AB7;">
+                   style="font-size:0.74rem; color:#534AB7;">
                     Ver todos
                 </a>
 
@@ -373,8 +378,8 @@
 
             @if (Model.ProximosEventos == null || !Model.ProximosEventos.Any())
             {
-                <div class="text-center text-muted py-3"
-                     style="font-size:0.75rem;">
+                <div class="text-center text-muted py-4"
+                     style="font-size:0.8rem;">
                     Sin eventos próximos
                 </div>
             }
@@ -389,21 +394,21 @@
                         out var fechaEvento
                     );
 
-                    <div class="item-row">
+                    <div class="list-card mb-2" style="background:@colorFondo;">
 
-                        <div class="mini-cal">
+                        <div class="mini-cal" style="background:#fff;">
 
                             @if (fechaValida)
                             {
                                 <span class="fw-bold"
                                       style="color:#534AB7;
-                                    font-size:0.8rem;
+                                    font-size:0.9rem;
                                     line-height:1;">
                                     @fechaEvento.Day
                                 </span>
 
                                 <span style="color:#534AB7;
-                                    font-size:0.55rem;
+                                    font-size:0.6rem;
                                     line-height:1;">
                                     @fechaEvento.ToString("MMM").ToUpper()
                                 </span>
@@ -411,7 +416,7 @@
                             else
                             {
                                 <span class="fw-bold"
-                                      style="color:#534AB7; font-size:0.7rem;">
+                                      style="color:#534AB7; font-size:0.75rem;">
                                     --
                                 </span>
                             }
@@ -421,12 +426,12 @@
                         <div class="flex-grow-1 overflow-hidden">
 
                             <div class="text-truncate fw-medium"
-                                 style="font-size:0.75rem;">
+                                 style="font-size:0.8rem;">
                                 @evento.ClienteNombre
                             </div>
 
                             <div class="text-truncate text-muted"
-                                 style="font-size:0.65rem;">
+                                 style="font-size:0.7rem;">
                                 @evento.TipoEvento
                             </div>
 
@@ -434,15 +439,15 @@
 
                         <div class="text-end flex-shrink-0">
 
-                            <span class="badge-estado"
-                                  style="@($"background-color:{colorFondo}; color:{colorTexto};")">
+                            <div class="fw-bold"
+                                 style="color:@colorTexto; font-size:0.72rem;">
                                 @evento.Estado
-                            </span>
+                            </div>
 
                             @if (evento.SaldoPendiente > 0)
                             {
                                 <small class="text-danger d-block"
-                                       style="font-size:0.62rem;">
+                                       style="font-size:0.65rem;">
                                     ₡@evento.SaldoPendiente.ToString("N0")
                                 </small>
                             }
@@ -459,7 +464,7 @@
     <div class="col-12 col-lg-2">
         <div class="dash-card p-3 h-100">
 
-            <div class="d-flex justify-content-between align-items-center mb-1">
+            <div class="d-flex justify-content-between align-items-center mb-2">
 
                 <div class="section-title mb-0">
                     <i class="ti ti-receipt me-1"></i>
@@ -468,7 +473,7 @@
 
                 <a asp-controller="Pagos"
                    asp-action="Index"
-                   style="font-size:0.68rem; color:#534AB7;">
+                   style="font-size:0.74rem; color:#534AB7;">
                     Ver
                 </a>
 
@@ -476,8 +481,8 @@
 
             @if (Model.UltimosPagos == null || !Model.UltimosPagos.Any())
             {
-                <div class="text-center text-muted py-3"
-                     style="font-size:0.75rem;">
+                <div class="text-center text-muted py-4"
+                     style="font-size:0.8rem;">
                     Sin pagos
                 </div>
             }
@@ -485,31 +490,31 @@
             {
                 foreach (var pago in Model.UltimosPagos)
                 {
-                    <div class="item-row">
+                    <div class="list-card mb-2" style="background:#E6F4F0;">
 
                         <div class="mini-icon"
-                             style="background:#E6F4F0;">
+                             style="background:#0F6E56; border-radius:12px;">
                             <i class="ti ti-cash"
-                               style="color:#0F6E56; font-size:0.75rem;">
+                               style="color:#fff; font-size:0.85rem;">
                             </i>
                         </div>
 
                         <div class="flex-grow-1 overflow-hidden">
 
                             <div class="text-truncate fw-medium"
-                                 style="font-size:0.72rem;">
+                                 style="font-size:0.78rem;">
                                 @pago.ClienteNombre
                             </div>
 
                             <div class="text-muted text-truncate"
-                                 style="font-size:0.62rem;">
+                                 style="font-size:0.66rem;">
                                 @pago.FechaPago
                             </div>
 
                         </div>
 
                         <div class="fw-bold text-nowrap"
-                             style="color:#0F6E56; font-size:0.72rem;">
+                             style="color:#0F6E56; font-size:0.78rem;">
                             ₡@pago.Monto.ToString("N0")
                         </div>
 
@@ -589,7 +594,7 @@
                                     stepSize: 1,
                                     color: '#6C757D',
                                     font: {
-                                        size: 9
+                                        size: 10
                                     }
                                 },
                                 grid: {
@@ -600,60 +605,12 @@
                                 ticks: {
                                     color: '#6C757D',
                                     font: {
-                                        size: 9
+                                        size: 10
                                     }
                                 },
                                 grid: {
                                     display: false
                                 }
-                            }
-                        }
-                    }
-                });
-            }
-
-            const ctxDona = document.getElementById('chartEstados');
-
-            if (ctxDona) {
-                const estadosLabels = @Html.Raw(
-                                                    System.Text.Json.JsonSerializer.Serialize(
-                                                            Model.PorEstado.Select(e => e.Estado)
-                                    )
-                                    );
-
-                const estadosDatos = @Html.Raw(
-                                                    System.Text.Json.JsonSerializer.Serialize(
-                                                            Model.PorEstado.Select(e => e.Cantidad)
-                                    )
-                                    );
-
-                const coloresDona = {
-                    Confirmada: '#0F6E56',
-                    Realizada: '#1A56DB',
-                    Cancelada: '#993C1D',
-                    EnProceso: '#854F0B',
-                    Pendiente: '#534AB7'
-                };
-
-                new Chart(ctxDona, {
-                    type: 'doughnut',
-                    data: {
-                        labels: estadosLabels,
-                        datasets: [{
-                            data: estadosDatos,
-                            backgroundColor: estadosLabels.map(function(estado) {
-                                return coloresDona[estado] || '#534AB7';
-                            }),
-                            borderWidth: 0,
-                            hoverOffset: 3
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        cutout: '68%',
-                        plugins: {
-                            legend: {
-                                display: false
                             }
                         }
                     }

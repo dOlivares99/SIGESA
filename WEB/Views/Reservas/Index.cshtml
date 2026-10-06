@@ -79,19 +79,19 @@
             <tbody id="tableBody">
                 @foreach (var r in Model)
                 {
-                    var badgeEstado = r.Estado switch
+                    var (estadoBg, estadoColor) = r.Estado switch
                     {
-                        "Confirmada" => "bg-primary",
-                        "EnProceso"  => "bg-warning text-dark",
-                        "Realizada"  => "badge-activo",
-                        "Cancelada"  => "badge-cancelado",
-                        _            => "bg-secondary"
+                        "Confirmada" => ("#f0eeff", "#534AB7"),
+                        "EnProceso"  => ("#fff8e6", "#854F0B"),
+                        "Realizada"  => ("#e6f4f0", "#0F6E56"),
+                        "Cancelada"  => ("#ffeee8", "#993C1D"),
+                        _            => ("#fff8e6", "#854F0B")
                     };
-                    var badgePago = r.EstadoPago switch
+                    var (pagoBg, pagoColor) = r.EstadoPago switch
                     {
-                        "Saldado" => "badge-activo",
-                        "Parcial" => "badge-pendiente",
-                        _         => "bg-secondary"
+                        "Saldado" => ("#e6f4f0", "#0F6E56"),
+                        "Parcial" => ("#fff8e6", "#854F0B"),
+                        _         => ("#ffeee8", "#993C1D")
                     };
                     <tr data-cliente="@r.ClienteNombre.ToLower()"
                         data-tipo="@r.TipoEvento.ToLower()"
@@ -110,9 +110,9 @@
                         <td class="text-muted small">@r.TipoEvento</td>
                         <td class="text-muted small">@r.FechaEvento.ToString("dd/MM/yyyy")</td>
                         <td class="text-muted small">@r.NumPersonas</td>
-                        <td><span class="badge @badgeEstado">@r.Estado</span></td>
+                        <td><span class="badge rounded-pill px-3" style="background:@estadoBg;color:@estadoColor;">@r.Estado</span></td>
                         <td class="text-muted small">₡@r.MontoTotal.ToString("N2")</td>
-                        <td><span class="badge @badgePago">@r.EstadoPago</span></td>
+                        <td><span class="badge rounded-pill px-3" style="background:@pagoBg;color:@pagoColor;">@r.EstadoPago</span></td>
                         <td>
                             <a asp-action="Editar" asp-route-id="@r.EventoId"
                                class="btn btn-sm btn-outline-secondary" title="Editar">
@@ -135,10 +135,7 @@
             <p class="mt-2 mb-0">No se encontraron reservas</p>
         </div>
 
-        <div class="d-flex flex-column align-items-center mt-3 gap-1">
-            <div id="pagination"></div>
-            <small class="text-muted" id="paginationInfoBottom"></small>
-        </div>
+        <div class="d-flex justify-content-center mt-3" id="pagination"></div>
 
     </div>
 </div>
@@ -157,7 +154,6 @@
     const allRows           = Array.from(tableBody.querySelectorAll('tr'));
     const pagination        = document.getElementById('pagination');
     const paginationInfo    = document.getElementById('paginationInfo');
-    const paginationInfoBot = document.getElementById('paginationInfoBottom');
     const emptyMsg          = document.getElementById('emptyMsg');
 
     function normalize(str) {
@@ -205,11 +201,9 @@
 
         emptyMsg.classList.toggle('d-none', total > 0);
 
-        const info = total > 0
+        paginationInfo.textContent = total > 0
             ? `Mostrando ${Math.min(start+1,total)}–${Math.min(end,total)} de ${total} reserva${total !== 1 ? 's' : ''}`
             : '';
-        paginationInfo.textContent    = info;
-        paginationInfoBot.textContent = info;
 
         pagination.innerHTML = '';
         if (totalPages <= 1) return;

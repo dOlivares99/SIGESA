@@ -214,8 +214,25 @@
             };
 
             ul.appendChild(makeBtn('&laquo;', currentPage - 1, currentPage === 1, false));
-            for (let i = 1; i <= totalPages; i++)
-                ul.appendChild(makeBtn(i, i, false, i === currentPage));
+
+            const showPages = [];
+            if (currentPage > 3) showPages.push(1, '...');
+            for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) {
+                showPages.push(i);
+            }
+            if (currentPage < totalPages - 2) showPages.push('...', totalPages);
+
+            showPages.forEach(p => {
+                if (p === '...') {
+                    const li = document.createElement('li');
+                    li.className = 'page-item disabled';
+                    li.innerHTML = '<a class="page-link">…</a>';
+                    ul.appendChild(li);
+                } else {
+                    ul.appendChild(makeBtn(p, p, false, p === currentPage));
+                }
+            });
+
             ul.appendChild(makeBtn('&raquo;', currentPage + 1, currentPage === totalPages, false));
             pagination.appendChild(ul);
         }
