@@ -1,5 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+
+using System.Text.Json.Serialization;
 
 namespace Models.Entities;
 
@@ -13,5 +15,6 @@ public partial class TipoPago
 
     public bool Activo { get; set; }
 
+    [JsonIgnore] // navegación inversa: no se serializa (evita grafo infinito en el API)
     public virtual ICollection<Pago> Pagos { get; set; } = new List<Pago>();
 }

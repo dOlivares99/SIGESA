@@ -1,5 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+
+using System.Text.Json.Serialization;
 
 namespace Models.Entities;
 
@@ -19,14 +21,19 @@ public partial class Usuario
 
     public DateTime FechaCreacion { get; set; }
 
+    [JsonIgnore] // navegación inversa: no se serializa (evita grafo infinito en el API)
     public virtual ICollection<Auditoria> Auditoria { get; set; } = new List<Auditoria>();
 
+    [JsonIgnore] // navegación inversa: no se serializa (evita grafo infinito en el API)
     public virtual ICollection<Cotizacion> Cotizacions { get; set; } = new List<Cotizacion>();
 
+    [JsonIgnore] // navegación inversa: no se serializa (evita grafo infinito en el API)
     public virtual ICollection<Contrato> Contratos { get; set; } = new List<Contrato>();
 
+    [JsonIgnore] // navegación inversa: no se serializa (evita grafo infinito en el API)
     public virtual ICollection<Evento> Eventos { get; set; } = new List<Evento>();
 
+    [JsonIgnore] // navegación inversa: no se serializa (evita grafo infinito en el API)
     public virtual ICollection<Pago> Pagos { get; set; } = new List<Pago>();
 
     public virtual Rol Rol { get; set; } = null!;
