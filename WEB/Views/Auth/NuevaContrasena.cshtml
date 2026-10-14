@@ -63,7 +63,7 @@
                             <i class="ti ti-key" style="font-size:1.75rem;color:#534AB7;"></i>
                         </div>
                         <h5 class="fw-bold mb-1">Crea tu nueva contraseña</h5>
-                        <p class="text-muted small mb-0">Debe tener al menos 8 caracteres.</p>
+                        <p class="text-muted small mb-0">Mínimo 8 caracteres. Para mayor seguridad combina mayúsculas, números y símbolos.</p>
                     </div>
 
                     @if (!ViewData.ModelState.IsValid)
@@ -89,7 +89,6 @@
                                 <input asp-for="Contrasena" type="password"
                                        id="inputContrasena"
                                        class="form-control border-start-0 border-end-0 ps-0"
-                                       placeholder="Mínimo 8 caracteres"
                                        autocomplete="new-password"
                                        oninput="medirFortaleza(this.value)" />
                                 <button type="button" class="input-group-text bg-white"
@@ -116,7 +115,6 @@
                                 <input asp-for="ConfirmarContrasena" type="password"
                                        id="inputConfirmar"
                                        class="form-control border-start-0 border-end-0 ps-0"
-                                       placeholder="Repite la contraseña"
                                        autocomplete="new-password" />
                                 <button type="button" class="input-group-text bg-white"
                                         onclick="togglePwd('inputConfirmar', this)">

@@ -45,6 +45,7 @@
                         <label asp-for="Password" class="form-label fw-medium">Contraseña</label>
                         <input asp-for="Password" type="password" class="form-control"
                                placeholder="Mínimo 8 caracteres" />
+                        <div class="form-text">Mínimo 8 caracteres. Recomendado: mayúsculas, números y símbolos.</div>
                         <span asp-validation-for="Password" class="text-danger small"></span>
                     </div>
                     <div class="mb-4">
@@ -106,8 +107,9 @@
                 <div class="d-flex align-items-start gap-2 mt-3">
                     <i class="ti ti-lock mt-1" style="color:#534AB7;"></i>
                     <small class="text-muted">
-                        La contraseña debe tener mínimo 8 caracteres.
-                        El usuario podrá cambiarla desde su perfil.
+                        La contraseña debe tener mínimo 8 caracteres. Para que sea segura,
+                        combina mayúsculas, números y símbolos. El usuario podrá cambiarla
+                        desde su perfil.
                     </small>
                 </div>
             </div>
