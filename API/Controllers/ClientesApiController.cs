@@ -15,6 +15,14 @@ public class ClientesApiController(IClienteService clienteService) : ControllerB
         return Ok(clientes);
     }
 
+    // GET api/clientesapi/activos
+    [HttpGet("activos")]
+    public async Task<IActionResult> GetActivos()
+    {
+        var clientes = await clienteService.ObtenerActivosAsync();
+        return Ok(clientes);
+    }
+
     // GET api/clientesapi/5
     [HttpGet("{id}")]
     public async Task<IActionResult> Get(int id)
@@ -68,7 +76,20 @@ public class ClientesApiController(IClienteService clienteService) : ControllerB
             ? Ok(new { mensaje = "Cliente actualizado correctamente." })
             : NotFound(new { mensaje = "Cliente no encontrado." });
     }
+
+    // PATCH api/clientesapi/5/activo
+    [HttpPatch("{id}/activo")]
+    public async Task<IActionResult> CambiarActivo(int id,
+        [FromBody] CambiarActivoClienteRequest request)
+    {
+        var result = await clienteService.CambiarActivoAsync(id, request.Activo);
+
+        return result
+            ? Ok(new { mensaje = request.Activo ? "Cliente activado." : "Cliente archivado." })
+            : NotFound(new { mensaje = "Cliente no encontrado." });
+    }
 }
 
 public record CrearClienteRequest(string Nombre, string Documento, string Telefono, string? Email);
 public record ActualizarClienteRequest(string Nombre, string Documento, string Telefono, string? Email);
+public record CambiarActivoClienteRequest(bool Activo);

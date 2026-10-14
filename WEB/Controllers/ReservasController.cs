@@ -222,7 +222,7 @@ public IActionResult Calendario() => View();
     {
         try
         {
-            var cliResp = await _restProvider.GetAsync(_apiBase + "/clientesapi");
+            var cliResp = await _restProvider.GetAsync(_apiBase + "/clientesapi/activos");
             model.Clientes = JsonSerializer.Deserialize<List<JsonElement>>(cliResp, JsonOpts)?
                 .Select(c => new ClienteOpcionViewModel
                 {

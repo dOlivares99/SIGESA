@@ -17,5 +17,7 @@ public partial class Cliente
 
     public DateTime FechaRegistro { get; set; }
 
+    public bool Activo { get; set; }
+
     public virtual ICollection<Evento> Eventos { get; set; } = new List<Evento>();
 }

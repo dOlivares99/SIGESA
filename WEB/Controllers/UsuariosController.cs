@@ -106,4 +106,33 @@ public class UsuariosController : Controller
             return View(model);
         }
     }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CambiarActivo(int id, bool activo)
+    {
+        int.TryParse(HttpContext.Session.GetString("UsuarioId"), out var usuarioActualId);
+
+        if (!activo && usuarioActualId == id)
+        {
+            TempData["Error"] = "No puedes archivarte a ti mismo.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        try
+        {
+            var json = JsonSerializer.Serialize(new { activo, usuarioActualId });
+            await _restProvider.PatchAsync(_apiBase + $"/usuariosapi/{id}/activo", json);
+            TempData["Exito"] = activo ? "Usuario activado." : "Usuario archivado.";
+        }
+        catch (HttpRequestException ex) when (ex.Message.Contains("409"))
+        {
+            TempData["Error"] = "No se puede archivar al único administrador activo.";
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = "Error al cambiar el estado. Intente más tarde.";
+        }
+        return RedirectToAction(nameof(Index));
+    }
 }

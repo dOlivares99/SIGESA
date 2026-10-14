@@ -68,6 +68,7 @@ public partial class SIGESAContext : DbContext
 
             entity.HasIndex(e => e.Documento, "UQ_Cliente_Documento").IsUnique();
 
+            entity.Property(e => e.Activo).HasDefaultValue(true);
             entity.Property(e => e.Documento).HasMaxLength(20);
             entity.Property(e => e.Email).HasMaxLength(150);
             entity.Property(e => e.FechaRegistro)

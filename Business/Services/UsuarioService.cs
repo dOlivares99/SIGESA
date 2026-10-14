@@ -13,6 +13,7 @@ public interface IUsuarioService
     Task<bool> EmailExisteAsync(string email);
     Task<bool> CrearAsync(string nombre, string email, string password, int rolId);
     Task<bool> ActualizarAsync(int id, string nombre, string email, int rolId);
+    Task<(bool Exito, string? Error)> CambiarActivoAsync(int id, bool activo, int? usuarioActualId = null);
 }
 
 public class UsuarioService : IUsuarioService
@@ -66,6 +67,30 @@ public class UsuarioService : IUsuarioService
         usuario.RolId  = rolId;
 
         return await _repo.UpdateAsync(usuario);
+    }
+
+    public async Task<(bool Exito, string? Error)> CambiarActivoAsync(int id, bool activo, int? usuarioActualId = null)
+    {
+        var usuario = await _repo.FindAsync(id);
+        if (usuario == null) return (false, null);
+
+        if (!activo)
+        {
+            if (usuarioActualId == id)
+                return (false, "No puedes archivarte a ti mismo.");
+
+            if (usuario.Rol.Nombre == "Administrador")
+            {
+                var usuarios = await _repo.ReadAsync();
+                var otrosAdminsActivos = usuarios.Any(u =>
+                    u.Activo && u.UsuarioId != id && u.Rol.Nombre == "Administrador");
+                if (!otrosAdminsActivos)
+                    return (false, "No se puede archivar al único administrador activo.");
+            }
+        }
+
+        usuario.Activo = activo;
+        return (await _repo.UpdateAsync(usuario), null);
     }
 
     // ── Hash helpers ─────────────────────────────────────────

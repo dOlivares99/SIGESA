@@ -103,10 +103,19 @@ BEGIN
         Telefono        NVARCHAR(20)        NOT NULL,
         Email           NVARCHAR(150)           NULL,
         FechaRegistro   DATETIME            NOT NULL DEFAULT GETDATE(),
+        Activo          BIT                 NOT NULL DEFAULT 1,
         CONSTRAINT PK_Cliente           PRIMARY KEY (ClienteId),
         CONSTRAINT UQ_Cliente_Documento UNIQUE (Documento)
     );
     PRINT 'Tabla Cliente creada.';
+END
+GO
+
+-- Agrega la columna Activo si la tabla ya existía sin ella (bases creadas antes de este cambio)
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Cliente') AND name = 'Activo')
+BEGIN
+    ALTER TABLE Cliente ADD Activo BIT NOT NULL DEFAULT 1;
+    PRINT 'Columna Activo agregada a Cliente.';
 END
 GO
 

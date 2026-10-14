@@ -21,6 +21,11 @@
                 <input type="text" id="searchInput" class="form-control form-control-sm"
                        placeholder="Buscar por nombre, documento o correo..."
                        style="min-width:260px;">
+                <select id="statusFilter" class="form-select form-select-sm" style="min-width:140px;">
+                    <option value="todos">Todos</option>
+                    <option value="activo">Activo</option>
+                    <option value="inactivo">Archivado</option>
+                </select>
             </div>
             <small class="text-muted" id="paginationInfo"></small>
         </div>
@@ -34,6 +39,7 @@
                     <th class="py-3" style="color:#534AB7;">Teléfono</th>
                     <th class="py-3" style="color:#534AB7;">Correo</th>
                     <th class="py-3" style="color:#534AB7;">Registro</th>
+                    <th class="py-3" style="color:#534AB7;">Estado</th>
                     <th class="py-3" style="color:#534AB7;">Acciones</th>
                 </tr>
             </thead>
@@ -42,7 +48,8 @@
                 {
                     <tr data-nombre="@c.Nombre.ToLower()"
                         data-documento="@c.Documento.ToLower()"
-                        data-email="@(c.Email?.ToLower() ?? "")">
+                        data-email="@(c.Email?.ToLower() ?? "")"
+                        data-estado="@(c.Activo ? "activo" : "inactivo")">
                         <td class="ps-3">@c.ClienteId</td>
                         <td>
                             <div class="d-flex align-items-center gap-2">
@@ -58,6 +65,18 @@
                         <td class="text-muted small">@(c.Email ?? "—")</td>
                         <td class="text-muted small">@c.FechaRegistro.ToString("dd/MM/yyyy")</td>
                         <td>
+                            @if (c.Activo)
+                            {
+                                <span class="badge rounded-pill" style="background:#e6f4f0;color:#0F6E56;">
+                                    <i class="ti ti-circle-check me-1"></i>Activo
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge rounded-pill bg-secondary">Archivado</span>
+                            }
+                        </td>
+                        <td>
                             <a asp-action="Historial" asp-route-id="@c.ClienteId"
                                class="btn btn-sm btn-outline-secondary" title="Ver historial">
                                 <i class="ti ti-history"></i>
@@ -66,6 +85,17 @@
                                class="btn btn-sm btn-outline-secondary" title="Editar">
                                 <i class="ti ti-edit"></i>
                             </a>
+                            <form asp-action="CambiarActivo" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@c.ClienteId" />
+                                <input type="hidden" name="activo"
+                                       value="@(!c.Activo ? "true" : "false")" />
+                                <button type="submit"
+                                        class="btn btn-sm @(c.Activo ? "btn-outline-danger" : "btn-outline-success")"
+                                        title="@(c.Activo ? "Archivar" : "Activar")">
+                                    <i class="ti @(c.Activo ? "ti-toggle-left" : "ti-toggle-right")"></i>
+                                </button>
+                            </form>
                         </td>
                     </tr>
                 }
@@ -89,6 +119,7 @@
     let filteredRows = [];
 
     const searchInput    = document.getElementById('searchInput');
+    const statusFilter   = document.getElementById('statusFilter');
     const tableBody      = document.getElementById('tableBody');
     const allRows        = Array.from(tableBody.querySelectorAll('tr'));
     const pagination     = document.getElementById('pagination');
@@ -100,13 +131,18 @@
     }
 
     function filter() {
-        const q = normalize(searchInput.value.trim());
+        const q      = normalize(searchInput.value.trim());
+        const estado = statusFilter.value;
 
         filteredRows = allRows.filter(r => {
-            return !q ||
+            const matchSearch = !q ||
                 normalize(r.dataset.nombre).includes(q) ||
                 normalize(r.dataset.documento).includes(q) ||
                 normalize(r.dataset.email).includes(q);
+
+            const matchEstado = estado === 'todos' || r.dataset.estado === estado;
+
+            return matchSearch && matchEstado;
         });
 
         currentPage = 1;
@@ -182,6 +218,7 @@
     }
 
     searchInput.addEventListener('input', filter);
+    statusFilter.addEventListener('change', filter);
     filter();
 </script>
 }

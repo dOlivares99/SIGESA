@@ -1,6 +1,7 @@
 @model List<WEB.Models.ViewModels.UsuarioViewModel>
 @{
     ViewData["Title"] = "Usuarios";
+    int.TryParse(Context.Session.GetString("UsuarioId"), out var usuarioActualId);
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -83,6 +84,20 @@
                                class="btn btn-sm btn-outline-secondary" title="Editar">
                                 <i class="ti ti-edit"></i>
                             </a>
+                            @if (u.UsuarioId != usuarioActualId)
+                            {
+                                <form asp-action="CambiarActivo" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@u.UsuarioId" />
+                                    <input type="hidden" name="activo"
+                                           value="@(!u.Activo ? "true" : "false")" />
+                                    <button type="submit"
+                                            class="btn btn-sm @(u.Activo ? "btn-outline-danger" : "btn-outline-success")"
+                                            title="@(u.Activo ? "Archivar" : "Activar")">
+                                        <i class="ti @(u.Activo ? "ti-toggle-left" : "ti-toggle-right")"></i>
+                                    </button>
+                                </form>
+                            }
                         </td>
                     </tr>
                 }

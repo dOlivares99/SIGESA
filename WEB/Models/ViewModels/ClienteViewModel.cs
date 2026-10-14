@@ -10,6 +10,7 @@ public class ClienteViewModel
     public string Telefono { get; set; } = string.Empty;
     public string? Email { get; set; }
     public DateTime FechaRegistro { get; set; }
+    public bool Activo { get; set; }
 }
 
 public class ClienteFormViewModel

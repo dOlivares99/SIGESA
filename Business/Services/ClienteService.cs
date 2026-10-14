@@ -6,11 +6,13 @@ namespace Business.Services;
 public interface IClienteService
 {
     Task<IEnumerable<Cliente>> ObtenerTodosAsync();
+    Task<IEnumerable<Cliente>> ObtenerActivosAsync();
     Task<Cliente?> ObtenerPorIdAsync(int id);
     Task<Cliente?> ObtenerConHistorialAsync(int id);
     Task<bool> DocumentoExisteAsync(string documento, int? excludeId = null);
     Task<bool> CrearAsync(string nombre, string documento, string telefono, string? email);
     Task<bool> ActualizarAsync(int id, string nombre, string documento, string telefono, string? email);
+    Task<bool> CambiarActivoAsync(int id, bool activo);
 }
 
 public class ClienteService : IClienteService
@@ -24,6 +26,9 @@ public class ClienteService : IClienteService
 
     public async Task<IEnumerable<Cliente>> ObtenerTodosAsync() =>
         await _repo.ReadAsync();
+
+    public async Task<IEnumerable<Cliente>> ObtenerActivosAsync() =>
+        await _repo.ReadActivosAsync();
 
     public async Task<Cliente?> ObtenerPorIdAsync(int id) =>
         await _repo.FindAsync(id);
@@ -43,7 +48,8 @@ public class ClienteService : IClienteService
             Documento = documento,
             Telefono = telefono,
             Email = email,
-            FechaRegistro = DateTime.Now
+            FechaRegistro = DateTime.Now,
+            Activo = true
         };
         return await _repo.CreateAsync(cliente);
     }
@@ -59,6 +65,15 @@ public class ClienteService : IClienteService
         cliente.Telefono = telefono;
         cliente.Email = email;
 
+        return await _repo.UpdateAsync(cliente);
+    }
+
+    public async Task<bool> CambiarActivoAsync(int id, bool activo)
+    {
+        var cliente = await _repo.FindAsync(id);
+        if (cliente == null) return false;
+
+        cliente.Activo = activo;
         return await _repo.UpdateAsync(cliente);
     }
 }

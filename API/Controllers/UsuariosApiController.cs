@@ -68,8 +68,24 @@ public class UsuariosApiController(IUsuarioService usuarioService) : ControllerB
             ? Ok(new { mensaje = "Usuario actualizado correctamente." })
             : NotFound(new { mensaje = "Usuario no encontrado." });
     }
+
+    // PATCH api/usuariosapi/5/activo
+    [HttpPatch("{id}/activo")]
+    public async Task<IActionResult> CambiarActivo(int id,
+        [FromBody] CambiarActivoUsuarioRequest request)
+    {
+        var (exito, error) = await usuarioService.CambiarActivoAsync(id, request.Activo, request.UsuarioActualId);
+
+        if (!exito && error != null)
+            return Conflict(new { mensaje = error });
+
+        return exito
+            ? Ok(new { mensaje = request.Activo ? "Usuario activado." : "Usuario archivado." })
+            : NotFound(new { mensaje = "Usuario no encontrado." });
+    }
 }
 
 public record LoginRequest(string Email, string Password);
 public record CrearUsuarioRequest(string Nombre, string Email, string Password, int RolId);
 public record ActualizarUsuarioRequest(string Nombre, string Email, int RolId);
+public record CambiarActivoUsuarioRequest(bool Activo, int? UsuarioActualId = null);

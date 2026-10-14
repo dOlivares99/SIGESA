@@ -6,6 +6,7 @@ namespace Data.Repositories;
 public interface IClienteRepository
 {
     Task<IEnumerable<Cliente>> ReadAsync();
+    Task<IEnumerable<Cliente>> ReadActivosAsync();
     Task<Cliente?> FindAsync(int id);
     Task<Cliente?> FindConEventosAsync(int id);
     Task<bool> DocumentoExistsAsync(string documento, int? excludeId = null);
@@ -19,6 +20,12 @@ public class ClienteRepository : RepositoryBase<Cliente>, IClienteRepository
 
     public new async Task<IEnumerable<Cliente>> ReadAsync() =>
         await DbContext.Set<Cliente>()
+            .OrderBy(c => c.Nombre)
+            .ToListAsync();
+
+    public async Task<IEnumerable<Cliente>> ReadActivosAsync() =>
+        await DbContext.Set<Cliente>()
+            .Where(c => c.Activo)
             .OrderBy(c => c.Nombre)
             .ToListAsync();
 

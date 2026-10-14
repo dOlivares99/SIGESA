@@ -117,6 +117,24 @@ public class ClientesController : Controller
         }
     }
 
+    // POST /Clientes/CambiarActivo
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CambiarActivo(int id, bool activo)
+    {
+        try
+        {
+            var json = JsonSerializer.Serialize(new { activo });
+            await _restProvider.PatchAsync(_apiBase + $"/clientesapi/{id}/activo", json);
+            TempData["Exito"] = activo ? "Cliente activado." : "Cliente archivado.";
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = "Error al cambiar el estado. Intente más tarde.";
+        }
+        return RedirectToAction(nameof(Index));
+    }
+
     // GET /Clientes/Historial/5
     public async Task<IActionResult> Historial(int id)
     {

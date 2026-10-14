@@ -70,10 +70,38 @@
 <div class="card">
     <div class="card-body">
 
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <input type="text" id="searchInput" class="form-control form-control-sm"
-                   placeholder="Buscar por cliente, tipo de evento o estado..."
-                   style="max-width:320px;">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <div class="d-flex flex-wrap gap-2">
+                <input type="text" id="searchInput" class="form-control form-control-sm"
+                       placeholder="Buscar por cliente o paquete..."
+                       style="min-width:220px;">
+                <select id="pagoFilter" class="form-select form-select-sm" style="min-width:150px;">
+                    <option value="">Estado pago: todos</option>
+                    @foreach (var ep in Model.Select(x => x.EstadoPago).Distinct().OrderBy(x => x))
+                    {
+                        <option value="@ep">@ep</option>
+                    }
+                </select>
+                <select id="estadoFilter" class="form-select form-select-sm" style="min-width:160px;">
+                    <option value="">Estado reserva: todos</option>
+                    @foreach (var er in Model.Select(x => x.Estado).Distinct().OrderBy(x => x))
+                    {
+                        <option value="@er">@er</option>
+                    }
+                </select>
+                <select id="tipoFilter" class="form-select form-select-sm" style="min-width:160px;">
+                    <option value="">Tipo evento: todos</option>
+                    @foreach (var te in Model.Select(x => x.TipoEvento).Distinct().OrderBy(x => x))
+                    {
+                        <option value="@te">@te</option>
+                    }
+                </select>
+                <input type="date" id="desdeFilter" class="form-control form-control-sm" style="max-width:150px;" title="Desde">
+                <input type="date" id="hastaFilter" class="form-control form-control-sm" style="max-width:150px;" title="Hasta">
+                <button type="button" id="clearFilters" class="btn btn-sm btn-outline-secondary" title="Limpiar filtros">
+                    <i class="ti ti-filter-off"></i>
+                </button>
+            </div>
             <small class="text-muted" id="paginationInfo"></small>
         </div>
 
@@ -94,7 +122,9 @@
             <tbody id="tableBody">
                 @foreach (var s in Model)
                 {
-                    <tr>
+                    <tr data-cliente="@s.ClienteNombre" data-paquete="@s.PaqueteNombre"
+                        data-tipo="@s.TipoEvento" data-estado="@s.Estado"
+                        data-pago="@s.EstadoPago" data-fecha="@s.FechaEvento.ToString("yyyy-MM-dd")">
                         <td class="ps-3 text-muted small">@s.EventoId</td>
                         <td class="fw-medium">@s.ClienteNombre</td>
                         <td>
@@ -156,6 +186,12 @@
         let filteredRows = [];
 
         const searchInput    = document.getElementById('searchInput');
+        const pagoFilter     = document.getElementById('pagoFilter');
+        const estadoFilter   = document.getElementById('estadoFilter');
+        const tipoFilter     = document.getElementById('tipoFilter');
+        const desdeFilter    = document.getElementById('desdeFilter');
+        const hastaFilter    = document.getElementById('hastaFilter');
+        const filterInputs   = [searchInput, pagoFilter, estadoFilter, tipoFilter, desdeFilter, hastaFilter];
         const tableBody      = document.getElementById('tableBody');
         const allRows        = Array.from(tableBody.querySelectorAll('tr'));
         const pagination     = document.getElementById('pagination');
@@ -167,10 +203,25 @@
         }
 
         function filter() {
-            const q = normalize(searchInput.value.trim());
-            filteredRows = q
-                ? allRows.filter(r => normalize(r.innerText).includes(q))
-                : [...allRows];
+            const q     = normalize(searchInput.value.trim());
+            const pago  = pagoFilter.value;
+            const est   = estadoFilter.value;
+            const tipo  = tipoFilter.value;
+            const desde = desdeFilter.value;
+            const hasta = hastaFilter.value;
+
+            filteredRows = allRows.filter(r => {
+                const d = r.dataset;
+                const matchSearch = !q ||
+                    normalize(d.cliente).includes(q) ||
+                    normalize(d.paquete).includes(q);
+                return matchSearch &&
+                    (!pago  || d.pago   === pago) &&
+                    (!est   || d.estado === est) &&
+                    (!tipo  || d.tipo   === tipo) &&
+                    (!desde || d.fecha  >= desde) &&
+                    (!hasta || d.fecha  <= hasta);
+            });
             currentPage = 1;
             render();
         }
@@ -232,7 +283,11 @@
             pagination.appendChild(ul);
         }
 
-        searchInput.addEventListener('input', filter);
+        filterInputs.forEach(el => el.addEventListener('input', filter));
+        document.getElementById('clearFilters').addEventListener('click', () => {
+            filterInputs.forEach(el => el.value = '');
+            filter();
+        });
         filter();
     </script>
 }
