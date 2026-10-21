@@ -58,6 +58,11 @@ public class ClientesController : Controller
             TempData["Exito"] = "Cliente creado correctamente.";
             return RedirectToAction(nameof(Index));
         }
+        catch (HttpRequestException ex) when (ex.Message.Contains("409"))
+        {
+            ModelState.AddModelError("Documento", "El documento ya está registrado.");
+            return View(model);
+        }
         catch (Exception ex)
         {
             ModelState.AddModelError("", "Error al crear el cliente. Intente más tarde.");
@@ -109,6 +114,11 @@ public class ClientesController : Controller
             await _restProvider.PutAsync(_apiBase + "/clientesapi/" + id, json);
             TempData["Exito"] = "Cliente actualizado correctamente.";
             return RedirectToAction(nameof(Index));
+        }
+        catch (HttpRequestException ex) when (ex.Message.Contains("409"))
+        {
+            ModelState.AddModelError("Documento", "El documento ya está en uso por otro cliente.");
+            return View(model);
         }
         catch (Exception ex)
         {

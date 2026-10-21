@@ -24,7 +24,11 @@ internal static class RestProviderHelpers
     }
 
     internal static Exception ThrowError(string endpoint, Exception ex) =>
-        new ApplicationException($"Error al conectar con {endpoint}", ex);
+        // Preserva el HttpRequestException (lleva el código de estado, ej. 409)
+        // para que los controladores puedan distinguir errores como duplicados.
+        ex is HttpRequestException
+            ? ex
+            : new ApplicationException($"Error al conectar con {endpoint}", ex);
 }
 
 public class RestProvider : IRestProvider

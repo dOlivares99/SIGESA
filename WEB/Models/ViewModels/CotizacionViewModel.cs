@@ -29,7 +29,7 @@ public class CotizacionViewModel
     public int? ContratoId { get; set; }
 }
 
-public class CotizacionFormViewModel
+public class CotizacionFormViewModel : IValidatableObject
 {
     public int CotizacionId { get; set; }
 
@@ -55,6 +55,18 @@ public class CotizacionFormViewModel
 
     public List<ReservaOpcionViewModel> Reservas { get; set; }
         = new();
+
+    // CP-COT-04: el motivo es obligatorio cuando la cotización se rechaza.
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (string.Equals(Estado, "Rechazada", StringComparison.OrdinalIgnoreCase)
+            && string.IsNullOrWhiteSpace(MotivoRechazo))
+        {
+            yield return new ValidationResult(
+                "Debe indicar el motivo del rechazo.",
+                new[] { nameof(MotivoRechazo) });
+        }
+    }
 }
 
 public class ReservaOpcionViewModel
