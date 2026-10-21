@@ -45,14 +45,19 @@ public class ServiciosController : Controller
     }
 
     // GET /Servicios/Crear
-    public IActionResult Crear() => View(new ServicioFormViewModel());
+    public async Task<IActionResult> Crear()
+    {
+        await CargarCategoriasAsync();
+        return View(new ServicioFormViewModel());
+    }
 
     // POST /Servicios/Crear
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Crear(ServicioFormViewModel model)
     {
-        if (!ModelState.IsValid) return View(model);
+        model.Categoria = model.Categoria?.Trim() ?? string.Empty;
+        if (!ModelState.IsValid) { await CargarCategoriasAsync(); return View(model); }
         try
         {
             var json = JsonSerializer.Serialize(new
@@ -68,11 +73,13 @@ public class ServiciosController : Controller
         catch (HttpRequestException ex) when (ex.Message.Contains("409"))
         {
             ModelState.AddModelError("Nombre", "Ya existe un servicio con ese nombre.");
+            await CargarCategoriasAsync();
             return View(model);
         }
         catch (Exception ex)
         {
             ModelState.AddModelError("", "Error al registrar el servicio. Intente más tarde.");
+            await CargarCategoriasAsync();
             return View(model);
         }
     }
@@ -86,6 +93,7 @@ public class ServiciosController : Controller
             var s = JsonSerializer.Deserialize<ServicioViewModel>(response, JsonOpts);
             if (s == null) return NotFound();
 
+            await CargarCategoriasAsync();
             return View(new ServicioFormViewModel
             {
                 ServicioId = s.ServicioId,
@@ -106,7 +114,8 @@ public class ServiciosController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Editar(int id, ServicioFormViewModel model)
     {
-        if (!ModelState.IsValid) return View(model);
+        model.Categoria = model.Categoria?.Trim() ?? string.Empty;
+        if (!ModelState.IsValid) { await CargarCategoriasAsync(); return View(model); }
         try
         {
             var json = JsonSerializer.Serialize(new
@@ -122,12 +131,36 @@ public class ServiciosController : Controller
         catch (HttpRequestException ex) when (ex.Message.Contains("409"))
         {
             ModelState.AddModelError("Nombre", "Ya existe otro servicio con ese nombre.");
+            await CargarCategoriasAsync();
             return View(model);
         }
         catch (Exception ex)
         {
             ModelState.AddModelError("", "Error al actualizar el servicio. Intente más tarde.");
+            await CargarCategoriasAsync();
             return View(model);
+        }
+    }
+
+    // Categorías ya existentes, para el datalist de los formularios (CP-CAT-04:
+    // evita que reescribir el nombre genere una categoría nueva por cada variante)
+    private async Task CargarCategoriasAsync()
+    {
+        try
+        {
+            var response = await _restProvider.GetAsync(_apiBase + "/serviciosapi");
+            var servicios = JsonSerializer.Deserialize<List<ServicioViewModel>>(response, JsonOpts)
+                            ?? new();
+            ViewBag.Categorias = servicios
+                .Select(s => s.Categoria?.Trim())
+                .Where(c => !string.IsNullOrEmpty(c))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(c => c)
+                .ToList();
+        }
+        catch
+        {
+            ViewBag.Categorias = new List<string>();
         }
     }
 

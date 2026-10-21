@@ -39,10 +39,16 @@
                     </div>
                     <div class="mb-3">
                         <label asp-for="Categoria" class="form-label fw-medium">Categoría</label>
-                        <input asp-for="Categoria" class="form-control"
-                               placeholder="Ej: Audio, Iluminación, Catering..." />
+                        <input asp-for="Categoria" class="form-control" list="categoriasExistentes"
+                               placeholder="Ej: Audio, Iluminación, Catering..." autocomplete="off" />
+                        <datalist id="categoriasExistentes">
+                            @foreach (var cat in (ViewBag.Categorias as List<string>) ?? new List<string>())
+                            {
+                                <option value="@cat"></option>
+                            }
+                        </datalist>
                         <div class="form-text">
-                            Los servicios de la misma categoría se agrupan en el catálogo.
+                            Selecciona una categoría existente o escribe una nueva. Los servicios de la misma categoría se agrupan en el catálogo.
                         </div>
                         <span asp-validation-for="Categoria" class="text-danger small"></span>
                     </div>
